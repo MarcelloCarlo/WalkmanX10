@@ -1,0 +1,2 @@
+rootProject.name = 'WalkmanX10Mini'
+include ':app'

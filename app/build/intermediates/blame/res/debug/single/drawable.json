@@ -1,0 +1,162 @@
+[
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/music_playview_star_on.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/music_playview_star_on.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/previous_normal.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/previous_normal.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/btn_prev_selector.xml",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/btn_prev_selector.xml"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/btn_pause_selector.xml",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/btn_pause_selector.xml"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/music_menu_shuffle.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/music_menu_shuffle.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/music_playview_repeat_one.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/music_playview_repeat_one.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/widget_bg.xml",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/widget_bg.xml"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/music_playlists_add_normal.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/music_playlists_add_normal.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/notification_prev.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/notification_prev.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/music_playlists_list_favourites.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/music_playlists_list_favourites.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/music_playlists_list_most_played.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/music_playlists_list_most_played.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/play_pressed.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/play_pressed.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/widget_btn.xml",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/widget_btn.xml"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/play_normal.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/play_normal.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/music_playlists_list_newly_added.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/music_playlists_list_newly_added.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/music_menu_edit_music_info.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/music_menu_edit_music_info.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/music_menu_delete_playlist.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/music_menu_delete_playlist.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/previous_focused.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/previous_focused.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/next_focused.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/next_focused.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/widget_btn_accent.xml",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/widget_btn_accent.xml"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/music_menu_repeat.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/music_menu_repeat.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/pause_focused.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/pause_focused.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/music_playview_star.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/music_playview_star.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/pause_normal.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/pause_normal.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/music_menu_get_music_info.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/music_menu_get_music_info.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/music_playview_shuffle.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/music_playview_shuffle.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/btn_next_selector.xml",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/btn_next_selector.xml"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/play_focused.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/play_focused.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/music_playlists_list_custom.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/music_playlists_list_custom.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/notification_pause.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/notification_pause.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/notification_play.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/notification_play.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/notification_next.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/notification_next.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/btn_play_selector.xml",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/btn_play_selector.xml"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/next_normal.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/next_normal.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/pause_pressed.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/pause_pressed.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/musicplayer_default_album.jpg",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/musicplayer_default_album.jpg"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/next_pressed.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/next_pressed.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/previous_pressed.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/previous_pressed.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/music_playview_repeat_all.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/music_playview_repeat_all.png"
+    },
+    {
+        "merged": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/drawable/music_statusbar_icon.png",
+        "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/drawable/music_statusbar_icon.png"
+    }
+]

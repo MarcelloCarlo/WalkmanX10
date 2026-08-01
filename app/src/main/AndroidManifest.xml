@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.walkman.x10mini"
+    android:versionCode="1"
+    android:versionName="5.1.0">
+
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <supports-screens
+        android:anyDensity="true"
+        android:smallScreens="true"
+        android:normalScreens="true"
+        android:largeScreens="false" />
+
+    <application
+        android:icon="@mipmap/ic_launcher"
+        android:label="Walkman"
+        android:theme="@style/WalkmanTheme">
+
+        <activity
+            android:name=".WalkmanActivity"
+            android:label="Walkman"
+            android:launchMode="singleTask"
+            android:configChanges="keyboardHidden|keyboard">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MUSIC_PLAYER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="file" />
+                <data android:mimeType="audio/*" />
+                <data android:mimeType="application/ogg" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="content" />
+                <data android:host="media" />
+                <data android:mimeType="audio/*" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".NowPlayingActivity"
+            android:label="Now Playing"
+            android:launchMode="singleTop"
+            android:configChanges="keyboardHidden|keyboard" />
+
+        <activity
+            android:name=".EditInfoActivity"
+            android:label="Edit Track Info"
+            android:theme="@style/WalkmanTheme"
+            android:configChanges="keyboardHidden|keyboard" />
+
+        <activity
+            android:name=".JellyfinActivity"
+            android:label="Jellyfin"
+            android:configChanges="keyboardHidden|keyboard" />
+
+        <activity
+            android:name=".JellyfinSettingsActivity"
+            android:label="Jellyfin Server"
+            android:configChanges="keyboardHidden|keyboard" />
+
+        <activity
+            android:name=".JellyfinAudioActivity"
+            android:label="Audio Settings"
+            android:configChanges="keyboardHidden|keyboard" />
+
+        <service
+            android:name=".MusicService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <service
+            android:name=".MetadataService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <receiver android:name=".MediaButtonReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".NowPlayingWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.walkman.x10mini.WIDGET_UPDATE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.walkman.x10mini.WIDGET_PLAY_PAUSE" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.walkman.x10mini.WIDGET_NEXT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.walkman.x10mini.WIDGET_PREV" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info" />
+        </receiver>
+
+    </application>
+</manifest>

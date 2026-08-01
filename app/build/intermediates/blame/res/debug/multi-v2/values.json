@@ -1,0 +1,120 @@
+{
+    "logs": [
+        {
+            "outputFile": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values/values.xml",
+            "map": [
+                {
+                    "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/values/colors.xml",
+                    "from": {
+                        "startLines": "2,11,13,12,3,4,8,9,10,5,6,7",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,507,598,551,102,146,357,406,457,199,248,304",
+                        "endColumns": "46,43,51,46,43,52,48,50,49,48,55,52",
+                        "endOffsets": "97,546,645,593,141,194,401,452,502,243,299,352"
+                    },
+                    "to": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,102,146,198,245,289,342,391,442,492,541,597",
+                        "endColumns": "46,43,51,46,43,52,48,50,49,48,55,52",
+                        "endOffsets": "97,141,193,240,284,337,386,437,487,536,592,645"
+                    }
+                },
+                {
+                    "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/values/strings.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "44",
+                        "endOffsets": "95"
+                    },
+                    "to": {
+                        "startLines": "14",
+                        "startColumns": "4",
+                        "startOffsets": "650",
+                        "endColumns": "44",
+                        "endOffsets": "690"
+                    }
+                },
+                {
+                    "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/values/styles.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "6",
+                        "endColumns": "12",
+                        "endOffsets": "346"
+                    },
+                    "to": {
+                        "startLines": "15",
+                        "startColumns": "4",
+                        "startOffsets": "695",
+                        "endLines": "19",
+                        "endColumns": "12",
+                        "endOffsets": "986"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/res/merged/debug/values/values.xml",
+            "map": [
+                {
+                    "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/values/colors.xml",
+                    "from": {
+                        "startLines": "2,11,13,12,3,4,8,9,10,5,6,7",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,507,598,551,102,146,357,406,457,199,248,304",
+                        "endColumns": "46,43,51,46,43,52,48,50,49,48,55,52",
+                        "endOffsets": "97,546,645,593,141,194,401,452,502,243,299,352"
+                    },
+                    "to": {
+                        "startLines": "2,3,4,5,6,7,8,9,10,11,12,13",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,102,146,198,245,289,342,391,442,492,541,597",
+                        "endColumns": "46,43,51,46,43,52,48,50,49,48,55,52",
+                        "endOffsets": "97,141,193,240,284,337,386,437,487,536,592,645"
+                    }
+                },
+                {
+                    "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/values/strings.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "44",
+                        "endOffsets": "95"
+                    },
+                    "to": {
+                        "startLines": "14",
+                        "startColumns": "4",
+                        "startOffsets": "650",
+                        "endColumns": "44",
+                        "endOffsets": "690"
+                    }
+                },
+                {
+                    "source": "/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/src/main/res/values/styles.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "6",
+                        "endColumns": "12",
+                        "endOffsets": "346"
+                    },
+                    "to": {
+                        "startLines": "15",
+                        "startColumns": "4",
+                        "startOffsets": "695",
+                        "endLines": "19",
+                        "endColumns": "12",
+                        "endOffsets": "986"
+                    }
+                }
+            ]
+        }
+    ]
+}
