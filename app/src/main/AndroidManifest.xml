@@ -26,7 +26,7 @@
             android:name=".WalkmanActivity"
             android:label="Walkman"
             android:launchMode="singleTask"
-            android:configChanges="keyboardHidden|keyboard">
+            android:configChanges="orientation|screenSize|keyboardHidden|keyboard">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -55,28 +55,28 @@
             android:name=".NowPlayingActivity"
             android:label="Now Playing"
             android:launchMode="singleTop"
-            android:configChanges="keyboardHidden|keyboard" />
+            android:configChanges="orientation|screenSize|keyboardHidden|keyboard" />
 
         <activity
             android:name=".EditInfoActivity"
             android:label="Edit Track Info"
             android:theme="@style/WalkmanTheme"
-            android:configChanges="keyboardHidden|keyboard" />
+            android:configChanges="orientation|screenSize|keyboardHidden|keyboard" />
 
         <activity
             android:name=".JellyfinActivity"
             android:label="Jellyfin"
-            android:configChanges="keyboardHidden|keyboard" />
+            android:configChanges="orientation|screenSize|keyboardHidden|keyboard" />
 
         <activity
             android:name=".JellyfinSettingsActivity"
             android:label="Jellyfin Server"
-            android:configChanges="keyboardHidden|keyboard" />
+            android:configChanges="orientation|screenSize|keyboardHidden|keyboard" />
 
         <activity
             android:name=".JellyfinAudioActivity"
             android:label="Audio Settings"
-            android:configChanges="keyboardHidden|keyboard" />
+            android:configChanges="orientation|screenSize|keyboardHidden|keyboard" />
 
         <service
             android:name=".MusicService"

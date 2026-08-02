@@ -1,7 +1,0 @@
-#Internal package file, do not edit.
-#Sun Aug 02 02:08:40 PST 2026
-0.base=/Users/johgutie/Documents/walkmanx10/walkman_x10mini/app/build/intermediates/transforms/dexMerger/debug/0
-0.path=classes.dex
-count=1
-0.baseType=DIRECTORY
-0.set=DEX

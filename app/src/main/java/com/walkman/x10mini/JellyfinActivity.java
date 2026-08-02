@@ -170,7 +170,7 @@ public class JellyfinActivity extends ListActivity {
         SharedPreferences ap = getSharedPreferences("jf_album_prefs", MODE_PRIVATE);
         mAlbumSortField = ap.getInt("sort_field", SORT_NAME);
         mAlbumSortAsc = ap.getBoolean("sort_asc", true);
-        mAlbumGridView = ap.getBoolean("grid_view", false);
+        mAlbumGridView = ap.getBoolean("grid_view", true);
 
         if (mSortLabel != null) {
             mSortLabel.setOnClickListener(new View.OnClickListener() {
