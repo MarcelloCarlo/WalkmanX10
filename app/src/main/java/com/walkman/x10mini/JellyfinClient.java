@@ -127,9 +127,9 @@ public class JellyfinClient {
         return parseItems(json, "MusicArtist");
     }
 
-    public ArrayList<JellyfinItem> getAlbums(String artistId) {
+    public ArrayList<JellyfinItem> getAlbums(String artistId, String sortBy, String sortOrder) {
         String url = mServerUrl + "/Users/" + mUserId + "/Items?IncludeItemTypes=MusicAlbum"
-                + "&Recursive=true&SortBy=ProductionYear,SortName&SortOrder=Ascending"
+                + "&Recursive=true&SortBy=" + sortBy + "&SortOrder=" + sortOrder
                 + "&Fields=PrimaryImageTag,Artists,AlbumArtist,ProductionYear&Limit=200&StartIndex=0";
         if (artistId != null) {
             url += "&ArtistIds=" + artistId;

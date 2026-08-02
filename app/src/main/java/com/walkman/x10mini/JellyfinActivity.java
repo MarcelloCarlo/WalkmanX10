@@ -290,14 +290,15 @@ public class JellyfinActivity extends ListActivity {
         updateTabs();
         showFilterBar();
         showLoading();
+        final String sortBy = getJellyfinSortBy();
+        final String sortOrder = getJellyfinSortOrder();
         new Thread(new Runnable() {
             public void run() {
-                final ArrayList<JellyfinClient.JellyfinItem> result = mClient.getAlbums(artistId);
+                final ArrayList<JellyfinClient.JellyfinItem> result = mClient.getAlbums(artistId, sortBy, sortOrder);
                 mHandler.post(new Runnable() {
                     public void run() {
                         hideLoading();
                         mItems = result;
-                        sortAlbums();
                         showAlbumView();
                     }
                 });
@@ -859,10 +860,21 @@ public class JellyfinActivity extends ListActivity {
         });
     }
 
+    private String getJellyfinSortBy() {
+        switch (mAlbumSortField) {
+            case SORT_YEAR: return "ProductionYear,SortName";
+            case SORT_ARTIST: return "AlbumArtist,SortName";
+            default: return "SortName";
+        }
+    }
+
+    private String getJellyfinSortOrder() {
+        return mAlbumSortAsc ? "Ascending" : "Descending";
+    }
+
     private void resortAndRefreshAlbums() {
         showFilterBar();
-        sortAlbums();
-        showAlbumView();
+        loadAlbums(mDrillArtistId);
     }
 
     private void showAlbumView() {
