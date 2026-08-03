@@ -30,7 +30,7 @@
                 android:layout_height="wrap_content"
                 android:text="Edit Track Info"
                 android:textColor="@color/walkman_blue"
-                android:textSize="15sp"
+                android:textSize="17sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:text="Title"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:layout_marginBottom="2dp" />
 
         <EditText
@@ -47,7 +47,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/text_primary"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:singleLine="true"
             android:background="@color/surface_elevated"
             android:padding="6dp"
@@ -58,7 +58,7 @@
             android:layout_height="wrap_content"
             android:text="Artist"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:layout_marginBottom="2dp" />
 
         <EditText
@@ -66,7 +66,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/text_primary"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:singleLine="true"
             android:background="@color/surface_elevated"
             android:padding="6dp"
@@ -77,7 +77,7 @@
             android:layout_height="wrap_content"
             android:text="Album"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:layout_marginBottom="2dp" />
 
         <EditText
@@ -85,7 +85,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/text_primary"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:singleLine="true"
             android:background="@color/surface_elevated"
             android:padding="6dp"
@@ -96,7 +96,7 @@
             android:layout_height="wrap_content"
             android:text="Year"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:layout_marginBottom="2dp" />
 
         <EditText
@@ -104,7 +104,7 @@
             android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:textColor="@color/text_primary"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:singleLine="true"
             android:inputType="number"
             android:background="@color/surface_elevated"
@@ -116,7 +116,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/walkman_blue"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:layout_marginBottom="8dp" />
 
         <LinearLayout
@@ -130,7 +130,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Lookup"
-                android:textSize="12sp" />
+                android:textSize="14sp" />
 
             <Button
                 android:id="@+id/btn_save"
@@ -138,7 +138,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Save"
-                android:textSize="12sp" />
+                android:textSize="14sp" />
 
             <Button
                 android:id="@+id/btn_cancel"
@@ -146,7 +146,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Cancel"
-                android:textSize="12sp" />
+                android:textSize="14sp" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

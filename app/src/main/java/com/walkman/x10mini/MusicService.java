@@ -67,6 +67,10 @@ public class MusicService extends Service implements
     }
 
     private MediaPlayer mPlayer;
+    private MediaPlayer mNextPlayer;
+    private boolean mNextPrepared = false;
+    private int mNextIndex = -1;
+    private int mJellyfinSeekOffset = 0;
     private ArrayList<Long> mPlayQueue = new ArrayList<Long>();
     private int mCurrentIndex = -1;
     private boolean mIsPlaying = false;
@@ -95,6 +99,19 @@ public class MusicService extends Service implements
             if (mIsPrepared && mIsPlaying) {
                 saveState();
                 mHandler.postDelayed(this, 5000);
+            }
+        }
+    };
+
+    private Runnable mGaplessChecker = new Runnable() {
+        public void run() {
+            if (!mIsPrepared || !mIsPlaying || mRepeatMode == 2) return;
+            int remaining = mPlayer.getDuration() - mPlayer.getCurrentPosition();
+            if (remaining < 5000 && remaining > 0 && mNextPlayer == null) {
+                prepareNextTrack();
+            }
+            if (mIsPrepared && mIsPlaying) {
+                mHandler.postDelayed(this, 1000);
             }
         }
     };
@@ -255,19 +272,65 @@ public class MusicService extends Service implements
     }
 
     public void addToQueue(long id) {
+        if (mIsJellyfinQueue) {
+            clearJellyfinQueue();
+        }
         mPlayQueue.add(id);
         sendBroadcast(new Intent(QUEUE_CHANGED));
     }
 
     public void addJellyfinToQueue(JellyfinTrack track) {
+        if (!mIsJellyfinQueue) {
+            clearLocalQueue();
+        }
         long syntheticId = mNextJellyfinId--;
         mJellyfinTracks.put(syntheticId, track);
         mPlayQueue.add(syntheticId);
         sendBroadcast(new Intent(QUEUE_CHANGED));
     }
 
+    public void addToQueueNext(long id) {
+        if (mIsJellyfinQueue) {
+            clearJellyfinQueue();
+        }
+        int insertPos = mCurrentIndex + 1;
+        if (insertPos > mPlayQueue.size()) insertPos = mPlayQueue.size();
+        mPlayQueue.add(insertPos, id);
+        sendBroadcast(new Intent(QUEUE_CHANGED));
+    }
+
+    public void addJellyfinToQueueNext(JellyfinTrack track) {
+        if (!mIsJellyfinQueue) {
+            clearLocalQueue();
+        }
+        long syntheticId = mNextJellyfinId--;
+        mJellyfinTracks.put(syntheticId, track);
+        int insertPos = mCurrentIndex + 1;
+        if (insertPos > mPlayQueue.size()) insertPos = mPlayQueue.size();
+        mPlayQueue.add(insertPos, syntheticId);
+        sendBroadcast(new Intent(QUEUE_CHANGED));
+    }
+
+    private void clearJellyfinQueue() {
+        releaseNextPlayer();
+        mJellyfinTracks.clear();
+        mPlayQueue.clear();
+        mNextJellyfinId = -1;
+        mIsJellyfinQueue = false;
+        mCurrentIndex = -1;
+    }
+
+    private void clearLocalQueue() {
+        releaseNextPlayer();
+        mPlayQueue.clear();
+        mIsJellyfinQueue = true;
+        mCurrentIndex = -1;
+    }
+
     private void openAndPlay(int index) {
         if (index < 0 || index >= mPlayQueue.size()) return;
+        releaseNextPlayer();
+        mJellyfinSeekOffset = 0;
         mCurrentIndex = index;
         mCurrentId = mPlayQueue.get(index);
 
@@ -334,6 +397,10 @@ public class MusicService extends Service implements
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+        if (mp == mNextPlayer) {
+            mNextPrepared = true;
+            return;
+        }
         mIsPrepared = true;
         int playerDur = mp.getDuration();
         if (playerDur > 0) {
@@ -352,6 +419,8 @@ public class MusicService extends Service implements
         showNotification();
         mHandler.removeCallbacks(mPositionSaver);
         mHandler.postDelayed(mPositionSaver, 5000);
+        mHandler.removeCallbacks(mGaplessChecker);
+        mHandler.postDelayed(mGaplessChecker, 1000);
         notifyMetaChanged();
         notifyPlayStateChanged();
     }
@@ -360,7 +429,49 @@ public class MusicService extends Service implements
     public void onCompletion(MediaPlayer mp) {
         if (mRepeatMode == 2) {
             openAndPlay(mCurrentIndex);
+            return;
+        }
+        if (mNextPlayer != null && mNextPrepared && mNextIndex >= 0) {
+            mPlayer.reset();
+            mPlayer.release();
+            mPlayer = mNextPlayer;
+            mNextPlayer = null;
+            mNextPrepared = false;
+            mJellyfinSeekOffset = 0;
+            mCurrentIndex = mNextIndex;
+            mNextIndex = -1;
+            mCurrentId = mPlayQueue.get(mCurrentIndex);
+            if (mCurrentId < 0 && mJellyfinTracks.containsKey(mCurrentId)) {
+                JellyfinTrack jt = mJellyfinTracks.get(mCurrentId);
+                mCurrentTitle = jt.title != null ? jt.title : "";
+                mCurrentArtist = jt.artist != null ? jt.artist : "";
+                mCurrentAlbum = jt.album != null ? jt.album : "";
+                mCurrentAlbumId = mCurrentId;
+                mCurrentFilePath = "";
+                mSavedDuration = (int) jt.durationMs;
+            } else {
+                loadTrackInfo(mCurrentId);
+            }
+            mPlayer.setOnCompletionListener(this);
+            mPlayer.setOnErrorListener(this);
+            mPlayer.setOnPreparedListener(this);
+            mIsPrepared = true;
+            int playerDur = mPlayer.getDuration();
+            if (playerDur > 0) mSavedDuration = playerDur;
+            mPlayer.start();
+            mIsPlaying = true;
+            if (mCurrentId >= 0) recordPlay(mCurrentId);
+            saveState();
+            showNotification();
+            updateWidget();
+            mHandler.removeCallbacks(mPositionSaver);
+            mHandler.postDelayed(mPositionSaver, 5000);
+            mHandler.removeCallbacks(mGaplessChecker);
+            mHandler.postDelayed(mGaplessChecker, 1000);
+            notifyMetaChanged();
+            notifyPlayStateChanged();
         } else {
+            releaseNextPlayer();
             next();
         }
     }
@@ -368,10 +479,66 @@ public class MusicService extends Service implements
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         Log.e(TAG, "MediaPlayer error: " + what + "/" + extra);
+        if (mp == mNextPlayer) {
+            releaseNextPlayer();
+            return true;
+        }
         mIsPlaying = false;
         mIsPrepared = false;
         notifyPlayStateChanged();
         return true;
+    }
+
+    private void prepareNextTrack() {
+        if (mPlayQueue.isEmpty() || mNextPlayer != null) return;
+        int nextIdx;
+        if (mShuffle) {
+            nextIdx = (int)(Math.random() * mPlayQueue.size());
+        } else {
+            nextIdx = mCurrentIndex + 1;
+            if (nextIdx >= mPlayQueue.size()) {
+                if (mRepeatMode == 1) {
+                    nextIdx = 0;
+                } else {
+                    return;
+                }
+            }
+        }
+        long nextId = mPlayQueue.get(nextIdx);
+        try {
+            mNextPlayer = new MediaPlayer();
+            mNextPlayer.setOnPreparedListener(this);
+            mNextPlayer.setOnErrorListener(this);
+            mNextPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            if (nextId < 0 && mJellyfinTracks.containsKey(nextId)) {
+                JellyfinTrack jt = mJellyfinTracks.get(nextId);
+                mNextPlayer.setDataSource(jt.streamUrl);
+            } else {
+                Uri uri = ContentUris.withAppendedId(
+                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, nextId);
+                mNextPlayer.setDataSource(this, uri);
+            }
+            mNextIndex = nextIdx;
+            mNextPrepared = false;
+            mNextPlayer.prepareAsync();
+        } catch (Exception e) {
+            Log.e(TAG, "Error preparing next track", e);
+            releaseNextPlayer();
+        }
+    }
+
+    private void releaseNextPlayer() {
+        mHandler.removeCallbacks(mGaplessChecker);
+        if (mNextPlayer != null) {
+            try {
+                mNextPlayer.reset();
+                mNextPlayer.release();
+            } catch (Exception e) {
+            }
+            mNextPlayer = null;
+        }
+        mNextPrepared = false;
+        mNextIndex = -1;
     }
 
     public void play() {
@@ -401,6 +568,7 @@ public class MusicService extends Service implements
 
     public void stop() {
         if (mPlayer != null) {
+            releaseNextPlayer();
             mHandler.removeCallbacks(mPositionSaver);
             saveState();
             mPlayer.reset();
@@ -433,8 +601,8 @@ public class MusicService extends Service implements
 
     public void prev() {
         if (mPlayQueue.isEmpty()) return;
-        if (mIsPrepared && mPlayer.getCurrentPosition() > 3000) {
-            mPlayer.seekTo(0);
+        if (mIsPrepared && getCurrentPosition() > 3000) {
+            seekTo(0);
             return;
         }
         int prevIndex = mCurrentIndex - 1;
@@ -444,24 +612,49 @@ public class MusicService extends Service implements
         openAndPlay(prevIndex);
     }
 
+    private int mSeekSessionCounter = 0;
+
     public void seekTo(int ms) {
-        if (mIsPrepared) {
+        if (!mIsPrepared) return;
+        if (mCurrentId < 0 && mJellyfinTracks.containsKey(mCurrentId)) {
+            JellyfinTrack jt = mJellyfinTracks.get(mCurrentId);
+            String baseUrl = jt.streamUrl;
+            int stIdx = baseUrl.indexOf("&StartTimeTicks=");
+            if (stIdx >= 0) baseUrl = baseUrl.substring(0, stIdx);
+            stIdx = baseUrl.indexOf("&PlaySessionId=");
+            if (stIdx >= 0) baseUrl = baseUrl.substring(0, stIdx);
+            long ticks = (long) ms * 10000L;
+            String sessionId = "seek" + System.currentTimeMillis() + "_" + (mSeekSessionCounter++);
+            String seekUrl = baseUrl + "&StartTimeTicks=" + ticks
+                    + "&PlaySessionId=" + sessionId;
+            mJellyfinSeekOffset = ms;
+            releaseNextPlayer();
+            try {
+                mPlayer.reset();
+                mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mPlayer.setDataSource(seekUrl);
+                mIsPrepared = false;
+                mPlayer.prepareAsync();
+            } catch (IOException e) {
+                Log.e(TAG, "Error seeking Jellyfin stream", e);
+            }
+        } else {
             mPlayer.seekTo(ms);
         }
     }
 
     public int getCurrentPosition() {
-        if (mIsPrepared) return mPlayer.getCurrentPosition();
+        if (mIsPrepared) return mPlayer.getCurrentPosition() + mJellyfinSeekOffset;
         if (mPendingSeek > 0) return mPendingSeek;
-        return 0;
+        return mJellyfinSeekOffset;
     }
 
     public int getDuration() {
+        if (mSavedDuration > 0) return mSavedDuration;
         if (mIsPrepared) {
             int dur = mPlayer.getDuration();
             if (dur > 0) return dur;
         }
-        if (mSavedDuration > 0) return mSavedDuration;
         return 0;
     }
 
@@ -483,6 +676,44 @@ public class MusicService extends Service implements
     }
     public int getQueuePosition() { return mCurrentIndex; }
     public int getQueueSize() { return mPlayQueue.size(); }
+
+    public ArrayList<String[]> getQueueInfo() {
+        ArrayList<String[]> info = new ArrayList<String[]>();
+        for (int i = 0; i < mPlayQueue.size(); i++) {
+            long id = mPlayQueue.get(i);
+            String title = null;
+            String artist = null;
+            if (id < 0 && mJellyfinTracks.containsKey(id)) {
+                JellyfinTrack jt = mJellyfinTracks.get(id);
+                title = jt.title;
+                artist = jt.artist;
+            } else if (id >= 0) {
+                Cursor c = getContentResolver().query(
+                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                        new String[]{MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST},
+                        MediaStore.Audio.Media._ID + "=?",
+                        new String[]{String.valueOf(id)}, null);
+                if (c != null) {
+                    if (c.moveToFirst()) {
+                        title = c.getString(0);
+                        artist = c.getString(1);
+                    }
+                    c.close();
+                }
+            }
+            info.add(new String[]{
+                    title != null ? title : "Unknown",
+                    artist != null ? artist : "Unknown"
+            });
+        }
+        return info;
+    }
+
+    public void playQueueIndex(int index) {
+        if (index >= 0 && index < mPlayQueue.size()) {
+            openAndPlay(index);
+        }
+    }
 
     public int getRepeatMode() { return mRepeatMode; }
     public void setRepeatMode(int mode) { mRepeatMode = mode; }
@@ -675,12 +906,12 @@ public class MusicService extends Service implements
             rv.setImageViewResource(R.id.notif_album_art, R.drawable.musicplayer_default_album);
         }
 
-        PendingIntent prevPi = PendingIntent.getService(this, 1,
-                new Intent(this, MusicService.class).setAction(ACTION_PREV), 0);
-        PendingIntent togglePi = PendingIntent.getService(this, 2,
-                new Intent(this, MusicService.class).setAction(ACTION_TOGGLE), 0);
-        PendingIntent nextPi = PendingIntent.getService(this, 3,
-                new Intent(this, MusicService.class).setAction(ACTION_NEXT), 0);
+        PendingIntent prevPi = PendingIntent.getBroadcast(this, 1,
+                new Intent(WIDGET_PREV), 0);
+        PendingIntent togglePi = PendingIntent.getBroadcast(this, 2,
+                new Intent(WIDGET_PLAY_PAUSE), 0);
+        PendingIntent nextPi = PendingIntent.getBroadcast(this, 3,
+                new Intent(WIDGET_NEXT), 0);
 
         rv.setOnClickPendingIntent(R.id.notif_prev, prevPi);
         rv.setOnClickPendingIntent(R.id.notif_play_pause, togglePi);

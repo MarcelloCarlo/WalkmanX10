@@ -15,7 +15,7 @@
             android:layout_height="wrap_content"
             android:text="Audio Settings"
             android:textColor="@color/walkman_blue"
-            android:textSize="15sp"
+            android:textSize="17sp"
             android:textStyle="bold"
             android:layout_marginBottom="10dp" />
 
@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:text="Decoding Format"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:layout_marginBottom="2dp" />
 
         <Spinner
@@ -46,7 +46,7 @@
                 android:layout_height="wrap_content"
                 android:text="Bitrate"
                 android:textColor="@color/text_secondary"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 android:layout_marginBottom="2dp" />
 
             <Spinner
@@ -69,7 +69,7 @@
                 android:layout_height="wrap_content"
                 android:text="Sample Rate"
                 android:textColor="@color/text_secondary"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 android:layout_marginBottom="2dp" />
 
             <Spinner
@@ -86,6 +86,6 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/walkman_blue"
-            android:textSize="12sp" />
+            android:textSize="14sp" />
     </LinearLayout>
 </ScrollView>

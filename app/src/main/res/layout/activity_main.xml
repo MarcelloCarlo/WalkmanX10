@@ -20,7 +20,7 @@
             android:layout_weight="1"
             android:text="Artists"
             android:textColor="@color/text_tertiary"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:gravity="center"
             android:clickable="true"
             android:focusable="true" />
@@ -37,7 +37,7 @@
             android:layout_weight="1"
             android:text="Albums"
             android:textColor="@color/text_tertiary"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:gravity="center"
             android:clickable="true"
             android:focusable="true" />
@@ -54,7 +54,7 @@
             android:layout_weight="1"
             android:text="Tracks"
             android:textColor="@color/walkman_blue"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:textStyle="bold"
             android:gravity="center"
             android:clickable="true"
@@ -79,7 +79,7 @@
             android:layout_height="28dp"
             android:layout_weight="1"
             android:hint="Search music..."
-            android:textSize="13sp"
+            android:textSize="15sp"
             android:textColor="@color/text_primary"
             android:textColorHint="@color/text_tertiary"
             android:background="@color/surface"
@@ -96,7 +96,7 @@
             android:text="×"
             android:gravity="center"
             android:textColor="@color/text_tertiary"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:clickable="true"
             android:focusable="true" />
     </LinearLayout>
@@ -118,7 +118,7 @@
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:text="Name"
-            android:textSize="13sp"
+            android:textSize="15sp"
             android:textColor="@color/walkman_blue"
             android:gravity="center_vertical"
             android:clickable="true"
@@ -146,7 +146,7 @@
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:text="Grid"
-            android:textSize="13sp"
+            android:textSize="15sp"
             android:textColor="@color/text_secondary"
             android:gravity="center_vertical"
             android:clickable="true"
@@ -189,7 +189,7 @@
         android:gravity="center"
         android:text="No music found"
         android:textColor="@color/text_tertiary"
-        android:textSize="13sp"
+        android:textSize="15sp"
         android:visibility="gone" />
 
     <!-- Now Playing bar border -->
@@ -228,7 +228,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:textColor="@color/text_primary"
-            android:textSize="13sp"
+            android:textSize="15sp"
             android:singleLine="true"
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="marquee_forever"

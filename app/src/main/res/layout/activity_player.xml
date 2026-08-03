@@ -20,7 +20,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/text_primary"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:textStyle="bold"
             android:singleLine="true"
             android:ellipsize="marquee"
@@ -37,7 +37,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/text_secondary"
-            android:textSize="13sp"
+            android:textSize="15sp"
             android:singleLine="true"
             android:ellipsize="end"
             android:layout_marginTop="2dp" />
@@ -47,7 +47,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/text_tertiary"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:singleLine="true"
             android:ellipsize="end" />
     </LinearLayout>
@@ -104,7 +104,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:textColor="@color/text_secondary"
-                android:textSize="11sp"
+                android:textSize="13sp"
                 android:text="0:00" />
 
             <TextView
@@ -113,7 +113,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:textColor="@color/text_secondary"
-                android:textSize="11sp"
+                android:textSize="13sp"
                 android:text="0:00" />
         </RelativeLayout>
 

@@ -198,6 +198,58 @@ public class JellyfinClient {
                 + "&api_key=" + mAccessToken;
     }
 
+    public static class LyricLine {
+        public String text;
+        public long startMs;
+    }
+
+    public static class LyricResult {
+        public ArrayList<LyricLine> lines;
+        public boolean synced;
+    }
+
+    public LyricResult getLyrics(String itemId) {
+        String url = mServerUrl + "/Audio/" + itemId + "/Lyrics";
+        String json = doGet(url);
+        if (json == null) return null;
+
+        int lyricsIdx = json.indexOf("\"Lyrics\"");
+        if (lyricsIdx < 0) return null;
+        int arrStart = json.indexOf('[', lyricsIdx);
+        if (arrStart < 0) return null;
+
+        LyricResult result = new LyricResult();
+        result.lines = new ArrayList<LyricLine>();
+        result.synced = false;
+
+        int pos = arrStart + 1;
+        while (pos < json.length()) {
+            int objStart = json.indexOf('{', pos);
+            if (objStart < 0) break;
+            int objEnd = findMatchingBrace(json, objStart);
+            if (objEnd < 0) break;
+
+            String obj = json.substring(objStart, objEnd + 1);
+            LyricLine line = new LyricLine();
+            line.text = extractJsonString(obj, "Text");
+            if (line.text == null) line.text = "";
+
+            long ticks = extractJsonLong(obj, "Start");
+            if (ticks > 0) {
+                line.startMs = ticks / 10000;
+                result.synced = true;
+            } else {
+                line.startMs = -1;
+            }
+
+            result.lines.add(line);
+            pos = objEnd + 1;
+        }
+
+        if (result.lines.isEmpty()) return null;
+        return result;
+    }
+
     public boolean downloadTrack(String itemId, File outputFile) {
         try {
             String url = getStreamUrl(itemId);
@@ -408,8 +460,45 @@ public class JellyfinClient {
             quoteEnd++;
         }
         if (quoteEnd >= json.length()) return null;
-        return json.substring(quoteStart, quoteEnd)
-                .replace("\\\"", "\"").replace("\\\\", "\\");
+        return unescapeJson(json.substring(quoteStart, quoteEnd));
+    }
+
+    private String unescapeJson(String s) {
+        if (s.indexOf('\\') < 0) return s;
+        StringBuilder sb = new StringBuilder(s.length());
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '\\' && i + 1 < s.length()) {
+                char next = s.charAt(i + 1);
+                switch (next) {
+                    case '"': sb.append('"'); i++; break;
+                    case '\\': sb.append('\\'); i++; break;
+                    case '/': sb.append('/'); i++; break;
+                    case 'n': sb.append('\n'); i++; break;
+                    case 'r': sb.append('\r'); i++; break;
+                    case 't': sb.append('\t'); i++; break;
+                    case 'b': sb.append('\b'); i++; break;
+                    case 'f': sb.append('\f'); i++; break;
+                    case 'u':
+                        if (i + 5 < s.length()) {
+                            try {
+                                int cp = Integer.parseInt(s.substring(i + 2, i + 6), 16);
+                                sb.append((char) cp);
+                                i += 5;
+                            } catch (NumberFormatException e) {
+                                sb.append(c);
+                            }
+                        } else {
+                            sb.append(c);
+                        }
+                        break;
+                    default: sb.append(c); break;
+                }
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     private int extractJsonInt(String json, String key) {

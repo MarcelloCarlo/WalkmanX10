@@ -15,7 +15,7 @@
             android:layout_height="wrap_content"
             android:text="Jellyfin Server"
             android:textColor="@color/walkman_blue"
-            android:textSize="15sp"
+            android:textSize="17sp"
             android:textStyle="bold"
             android:layout_marginBottom="10dp" />
 
@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:text="Server URL"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:layout_marginBottom="2dp" />
 
         <EditText
@@ -34,7 +34,7 @@
             android:hint="http://192.168.1.100:8096"
             android:textColor="@color/text_primary"
             android:textColorHint="@color/text_tertiary"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:singleLine="true"
             android:inputType="textUri"
             android:background="@color/surface_elevated"
@@ -46,7 +46,7 @@
             android:layout_height="wrap_content"
             android:text="Username"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:layout_marginBottom="2dp" />
 
         <EditText
@@ -55,7 +55,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/text_primary"
             android:textColorHint="@color/text_tertiary"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:singleLine="true"
             android:background="@color/surface_elevated"
             android:padding="6dp"
@@ -66,7 +66,7 @@
             android:layout_height="wrap_content"
             android:text="Password"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:layout_marginBottom="2dp" />
 
         <EditText
@@ -75,7 +75,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/text_primary"
             android:textColorHint="@color/text_tertiary"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:singleLine="true"
             android:inputType="textPassword"
             android:background="@color/surface_elevated"
@@ -87,7 +87,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/walkman_blue"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:layout_marginBottom="8dp" />
 
         <Button
@@ -95,6 +95,6 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="Connect"
-            android:textSize="12sp" />
+            android:textSize="14sp" />
     </LinearLayout>
 </ScrollView>

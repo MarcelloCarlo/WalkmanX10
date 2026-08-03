@@ -29,6 +29,7 @@ import android.widget.Toast;
 import android.widget.EditText;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Typeface;
 import java.io.File;
@@ -42,6 +43,9 @@ public class NowPlayingActivity extends Activity implements View.OnClickListener
     private static final int MENU_LYRICS = 4;
     private static final int MENU_FAVOURITE = 5;
     private static final int MENU_ADD_PLAYLIST = 6;
+    private static final int MENU_DOWNLOAD = 7;
+    private static final int MENU_GO_ALBUM = 8;
+    private static final int MENU_QUEUE = 9;
 
     private MusicService mService;
     private boolean mBound = false;
@@ -112,7 +116,33 @@ public class NowPlayingActivity extends Activity implements View.OnClickListener
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
+        bindViews();
+    }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        setContentView(R.layout.activity_player);
+        bindViews();
+        if (mBound) {
+            mTitle.setText(mService.getTitle());
+            mArtist.setText(mService.getArtist());
+            if (mAlbumText != null) mAlbumText.setText(mService.getAlbum());
+            updatePlayButton();
+            updateShuffleRepeat();
+            loadAlbumArt(mService.getAlbumId());
+            if (mLyricsVisible && mLrcLines != null) {
+                showSyncedLyrics();
+            } else if (mLyricsVisible && mCurrentLyrics != null) {
+                showPlainLyrics(mCurrentLyrics);
+            } else if (mLyricsVisible) {
+                showPlainLyrics("Loading lyrics...");
+                fetchAndShowLyrics();
+            }
+        }
+    }
+
+    private void bindViews() {
         mAlbumArt = (ImageView) findViewById(R.id.album_art);
         mTitle = (TextView) findViewById(R.id.player_title);
         mArtist = (TextView) findViewById(R.id.player_artist);
@@ -218,7 +248,8 @@ public class NowPlayingActivity extends Activity implements View.OnClickListener
         mLrcLines = null;
         mCurrentLrcIndex = -1;
         if (mLyricsVisible) {
-            hideLyrics();
+            showPlainLyrics("Loading lyrics...");
+            fetchAndShowLyrics();
         }
     }
 
@@ -344,6 +375,12 @@ public class NowPlayingActivity extends Activity implements View.OnClickListener
                 .setIcon(R.drawable.music_playview_star);
         menu.add(0, MENU_ADD_PLAYLIST, 5, "Add to Playlist")
                 .setIcon(android.R.drawable.ic_menu_add);
+        menu.add(0, MENU_DOWNLOAD, 4, "Download")
+                .setIcon(android.R.drawable.stat_sys_download);
+        menu.add(0, MENU_GO_ALBUM, 5, "Go to Album")
+                .setIcon(android.R.drawable.ic_menu_recent_history);
+        menu.add(0, MENU_QUEUE, 6, "View Queue")
+                .setIcon(R.drawable.music_playview_playqueue);
         return true;
     }
 
@@ -374,14 +411,43 @@ public class NowPlayingActivity extends Activity implements View.OnClickListener
             case MENU_ADD_PLAYLIST:
                 showAddToPlaylistDialog();
                 return true;
+            case MENU_DOWNLOAD:
+                downloadCurrentTrack();
+                return true;
+            case MENU_GO_ALBUM: {
+                if (mService.isJellyfinTrack()) {
+                    MusicService.JellyfinTrack jt = mService.getJellyfinTrack();
+                    if (jt != null && jt.albumId != null) {
+                        Intent ji = new Intent(this, JellyfinActivity.class);
+                        ji.putExtra("open_album_id", jt.albumId);
+                        ji.putExtra("open_album_name", jt.album);
+                        startActivity(ji);
+                    }
+                }
+                return true;
+            }
+            case MENU_QUEUE:
+                showQueueDialog();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean isJellyfin = mBound && mService.isJellyfinTrack();
+
         MenuItem fav = menu.findItem(MENU_FAVOURITE);
-        if (fav != null && mBound) {
+        MenuItem addPl = menu.findItem(MENU_ADD_PLAYLIST);
+        MenuItem dl = menu.findItem(MENU_DOWNLOAD);
+        MenuItem goAlbum = menu.findItem(MENU_GO_ALBUM);
+
+        if (fav != null) fav.setVisible(!isJellyfin);
+        if (addPl != null) addPl.setVisible(!isJellyfin);
+        if (dl != null) dl.setVisible(isJellyfin);
+        if (goAlbum != null) goAlbum.setVisible(isJellyfin);
+
+        if (fav != null && !isJellyfin && mBound) {
             long trackId = mService.getCurrentTrackId();
             if (trackId > 0) {
                 long favId = PlaylistUtils.getOrCreateFavourites(this);
@@ -417,8 +483,8 @@ public class NowPlayingActivity extends Activity implements View.OnClickListener
         TextView tv = new TextView(this);
         tv.setText(text);
         tv.setTextColor(getResources().getColor(R.color.text_secondary));
-        tv.setTextSize(12);
-        tv.setLineSpacing(2, 1);
+        tv.setTextSize(16);
+        tv.setLineSpacing(4, 1);
         mLyricsContainer.addView(tv);
         mLyricsScroll.setVisibility(View.VISIBLE);
         mAlbumArt.setVisibility(View.GONE);
@@ -434,7 +500,7 @@ public class NowPlayingActivity extends Activity implements View.OnClickListener
             TextView tv = new TextView(this);
             tv.setText(mLrcLines.get(i).text);
             tv.setTextColor(getResources().getColor(R.color.text_tertiary));
-            tv.setTextSize(12);
+            tv.setTextSize(16);
             tv.setPadding(0, pad, 0, pad);
             mLyricsContainer.addView(tv);
         }
@@ -477,26 +543,72 @@ public class NowPlayingActivity extends Activity implements View.OnClickListener
 
     private void fetchAndShowLyrics() {
         if (!mBound) return;
+        final boolean isJellyfin = mService.isJellyfinTrack();
         final String title = mService.getTitle();
         final String artist = mService.getArtist();
         final String filePath = mService.getFilePath();
+        final String jellyfinId = isJellyfin && mService.getJellyfinTrack() != null
+                ? mService.getJellyfinTrack().jellyfinId : null;
         new Thread(new Runnable() {
             public void run() {
-                String lrcContent = MetadataUtils.loadLrcFile(filePath);
-                if (lrcContent != null) {
-                    final ArrayList<LrcParser.LrcLine> parsed = LrcParser.parse(lrcContent);
-                    if (parsed.size() > 0) {
-                        mHandler.post(new Runnable() {
-                            public void run() {
-                                mLyricsLoaded = true;
-                                mLrcLines = parsed;
-                                mCurrentLyrics = null;
-                                if (mLyricsVisible) {
-                                    showSyncedLyrics();
+                if (isJellyfin && jellyfinId != null) {
+                    JellyfinClient client = new JellyfinClient();
+                    client.loadFromPrefs(NowPlayingActivity.this);
+                    if (client.isConfigured()) {
+                        JellyfinClient.LyricResult result = client.getLyrics(jellyfinId);
+                        if (result != null && !result.lines.isEmpty()) {
+                            if (result.synced) {
+                                final ArrayList<LrcParser.LrcLine> parsed =
+                                        new ArrayList<LrcParser.LrcLine>();
+                                for (int i = 0; i < result.lines.size(); i++) {
+                                    JellyfinClient.LyricLine ll = result.lines.get(i);
+                                    parsed.add(new LrcParser.LrcLine(ll.startMs, ll.text));
                                 }
+                                mHandler.post(new Runnable() {
+                                    public void run() {
+                                        mLyricsLoaded = true;
+                                        mLrcLines = parsed;
+                                        mCurrentLyrics = null;
+                                        if (mLyricsVisible) showSyncedLyrics();
+                                    }
+                                });
+                                return;
+                            } else {
+                                StringBuilder sb = new StringBuilder();
+                                for (int i = 0; i < result.lines.size(); i++) {
+                                    if (i > 0) sb.append('\n');
+                                    sb.append(result.lines.get(i).text);
+                                }
+                                final String plain = sb.toString();
+                                mHandler.post(new Runnable() {
+                                    public void run() {
+                                        mLyricsLoaded = true;
+                                        mLrcLines = null;
+                                        mCurrentLyrics = plain;
+                                        if (mLyricsVisible) showPlainLyrics(plain);
+                                    }
+                                });
+                                return;
                             }
-                        });
-                        return;
+                        }
+                    }
+                }
+
+                if (!isJellyfin) {
+                    String lrcContent = MetadataUtils.loadLrcFile(filePath);
+                    if (lrcContent != null) {
+                        final ArrayList<LrcParser.LrcLine> parsed = LrcParser.parse(lrcContent);
+                        if (parsed.size() > 0) {
+                            mHandler.post(new Runnable() {
+                                public void run() {
+                                    mLyricsLoaded = true;
+                                    mLrcLines = parsed;
+                                    mCurrentLyrics = null;
+                                    if (mLyricsVisible) showSyncedLyrics();
+                                }
+                            });
+                            return;
+                        }
                     }
                 }
 
@@ -552,6 +664,94 @@ public class NowPlayingActivity extends Activity implements View.OnClickListener
             PlaylistUtils.addToPlaylist(this, favId, trackId);
             Toast.makeText(this, "Added to Favourites", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void showQueueDialog() {
+        if (!mBound) return;
+        ArrayList<String[]> queue = mService.getQueueInfo();
+        if (queue.isEmpty()) {
+            Toast.makeText(this, "Queue is empty", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        final int currentPos = mService.getQueuePosition();
+        String[] items = new String[queue.size()];
+        for (int i = 0; i < queue.size(); i++) {
+            String prefix = (i == currentPos) ? "▶ " : "";
+            items[i] = prefix + queue.get(i)[0] + " – " + queue.get(i)[1];
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("Queue (" + queue.size() + " tracks)")
+                .setItems(items, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        if (mBound) {
+                            mService.playQueueIndex(which);
+                        }
+                    }
+                })
+                .show();
+    }
+
+    private void downloadCurrentTrack() {
+        if (!mBound || !mService.isJellyfinTrack()) return;
+        final MusicService.JellyfinTrack jt = mService.getJellyfinTrack();
+        if (jt == null || jt.streamUrl == null) {
+            Toast.makeText(this, "Cannot download this track", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Toast.makeText(this, "Downloading...", Toast.LENGTH_SHORT).show();
+        new Thread(new Runnable() {
+            public void run() {
+                String artist = jt.artist != null ? jt.artist : "Unknown";
+                String album = jt.album != null ? jt.album : "Unknown";
+                String name = jt.title != null ? jt.title : "track";
+                artist = artist.replaceAll("[/\\\\:*?\"<>|]", "_");
+                album = album.replaceAll("[/\\\\:*?\"<>|]", "_");
+                name = name.replaceAll("[/\\\\:*?\"<>|]", "_");
+
+                File dir = new File(Environment.getExternalStorageDirectory(),
+                        "Music/Jellyfin/" + artist + "/" + album);
+                final File outFile = new File(dir, name + ".mp3");
+                dir.mkdirs();
+
+                boolean ok = false;
+                try {
+                    java.net.HttpURLConnection conn =
+                            (java.net.HttpURLConnection) new java.net.URL(jt.streamUrl).openConnection();
+                    conn.setConnectTimeout(30000);
+                    conn.setReadTimeout(30000);
+                    if (conn.getResponseCode() == 200) {
+                        InputStream in = conn.getInputStream();
+                        java.io.FileOutputStream fos = new java.io.FileOutputStream(outFile);
+                        byte[] buf = new byte[8192];
+                        int n;
+                        while ((n = in.read(buf)) > 0) {
+                            fos.write(buf, 0, n);
+                        }
+                        fos.close();
+                        in.close();
+                        ok = true;
+                    }
+                    conn.disconnect();
+                } catch (Exception e) {
+                }
+
+                final boolean success = ok;
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        if (success) {
+                            sendBroadcast(new Intent(
+                                    Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
+                                    Uri.fromFile(outFile)));
+                            Toast.makeText(NowPlayingActivity.this,
+                                    "Downloaded", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(NowPlayingActivity.this,
+                                    "Download failed", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+        }).start();
     }
 
     private void showAddToPlaylistDialog() {

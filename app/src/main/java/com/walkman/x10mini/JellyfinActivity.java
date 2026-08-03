@@ -31,6 +31,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.SharedPreferences;
 import java.io.File;
 import java.util.ArrayList;
@@ -55,6 +57,14 @@ public class JellyfinActivity extends ListActivity {
     private static final int CTX_PLAY = 1;
     private static final int CTX_DOWNLOAD = 2;
     private static final int CTX_ADD_QUEUE = 3;
+    private static final int CTX_DOWNLOAD_ALBUM = 4;
+    private static final int CTX_DOWNLOAD_ARTIST = 5;
+    private static final int CTX_QUEUE_ALBUM = 6;
+    private static final int CTX_PLAY_NEXT = 7;
+    private static final int CTX_PLAY_NEXT_ALBUM = 8;
+    private static final int CTX_QUEUE_ARTIST = 9;
+    private static final int CTX_PLAY_NEXT_ARTIST = 10;
+    private static final int DOWNLOAD_NOTIFICATION_ID = 100;
 
     private JellyfinClient mClient;
     private MusicService mService;
@@ -91,6 +101,7 @@ public class JellyfinActivity extends ListActivity {
     private TextView mSortDirection;
     private TextView mViewToggle;
     private GridView mGridView;
+    private View mAlbumHeader;
 
     private ArrayList<JellyfinClient.JellyfinItem> mItems = new ArrayList<JellyfinClient.JellyfinItem>();
     private ArrayList<JellyfinClient.JellyfinItem> mSearchResults = new ArrayList<JellyfinClient.JellyfinItem>();
@@ -205,7 +216,7 @@ public class JellyfinActivity extends ListActivity {
                     if (position < mItems.size()) {
                         JellyfinClient.JellyfinItem item = mItems.get(position);
                         if ("MusicAlbum".equals(item.type)) {
-                            loadTracks(item.id, item.name);
+                            loadTracks(item.id, item.name, item.artist, item.year);
                         }
                     }
                 }
@@ -229,7 +240,17 @@ public class JellyfinActivity extends ListActivity {
         });
 
         registerForContextMenu(getListView());
-        loadArtists();
+        if (mGridView != null) {
+            registerForContextMenu(mGridView);
+        }
+
+        String openAlbumId = getIntent().getStringExtra("open_album_id");
+        if (openAlbumId != null) {
+            String openAlbumName = getIntent().getStringExtra("open_album_name");
+            loadTracks(openAlbumId, openAlbumName != null ? openAlbumName : "Album");
+        } else {
+            loadArtists();
+        }
     }
 
     @Override
@@ -269,6 +290,7 @@ public class JellyfinActivity extends ListActivity {
         mCurrentView = VIEW_ARTISTS;
         updateTabs();
         hideFilterBar();
+        removeAlbumHeader();
         showLoading();
         new Thread(new Runnable() {
             public void run() {
@@ -288,6 +310,7 @@ public class JellyfinActivity extends ListActivity {
         mCurrentView = artistId != null ? VIEW_ARTIST_ALBUMS : VIEW_ALBUMS;
         mDrillArtistId = artistId;
         updateTabs();
+        removeAlbumHeader();
         showFilterBar();
         showLoading();
         final String sortBy = getJellyfinSortBy();
@@ -307,11 +330,33 @@ public class JellyfinActivity extends ListActivity {
     }
 
     private void loadTracks(final String parentId, final String title) {
+        loadTracks(parentId, title, null, 0);
+    }
+
+    private void loadTracks(final String parentId, final String title,
+                            final String artist, final int year) {
         mCurrentView = VIEW_ALBUM_TRACKS;
         mDrillAlbumId = parentId;
         mDrillTitle = title;
         hideFilterBar();
+        removeAlbumHeader();
         showLoading();
+
+        mAlbumHeader = getLayoutInflater().inflate(R.layout.album_header, null);
+        ((TextView) mAlbumHeader.findViewById(R.id.header_album_name))
+                .setText(title != null ? title : "Unknown Album");
+        ((TextView) mAlbumHeader.findViewById(R.id.header_album_artist))
+                .setText(artist != null ? artist : "");
+        TextView yearView = (TextView) mAlbumHeader.findViewById(R.id.header_album_year);
+        if (year > 0) {
+            yearView.setText(String.valueOf(year));
+        } else {
+            yearView.setVisibility(View.GONE);
+        }
+        loadArtInto((ImageView) mAlbumHeader.findViewById(R.id.header_album_art), parentId);
+        setListAdapter(null);
+        getListView().addHeaderView(mAlbumHeader, null, false);
+
         new Thread(new Runnable() {
             public void run() {
                 final ArrayList<JellyfinClient.JellyfinItem> result = mClient.getTracks(parentId);
@@ -326,10 +371,18 @@ public class JellyfinActivity extends ListActivity {
         }).start();
     }
 
+    private void removeAlbumHeader() {
+        if (mAlbumHeader != null) {
+            getListView().removeHeaderView(mAlbumHeader);
+            mAlbumHeader = null;
+        }
+    }
+
     private void loadAllTracks() {
         mCurrentView = VIEW_TRACKS;
         updateTabs();
         hideFilterBar();
+        removeAlbumHeader();
         showLoading();
         new Thread(new Runnable() {
             public void run() {
@@ -352,15 +405,17 @@ public class JellyfinActivity extends ListActivity {
             return;
         }
 
-        if (position < 0 || position >= mItems.size()) return;
-        JellyfinClient.JellyfinItem item = mItems.get(position);
+        int headerCount = getListView().getHeaderViewsCount();
+        int adjPos = position - headerCount;
+        if (adjPos < 0 || adjPos >= mItems.size()) return;
+        JellyfinClient.JellyfinItem item = mItems.get(adjPos);
 
         if ("MusicArtist".equals(item.type)) {
             loadAlbums(item.id);
         } else if ("MusicAlbum".equals(item.type)) {
-            loadTracks(item.id, item.name);
+            loadTracks(item.id, item.name, item.artist, item.year);
         } else if ("Audio".equals(item.type)) {
-            playFromList(position);
+            playFromList(adjPos);
         }
     }
 
@@ -374,7 +429,7 @@ public class JellyfinActivity extends ListActivity {
             loadAlbums(item.id);
         } else if ("MusicAlbum".equals(item.type)) {
             hideSearchBar();
-            loadTracks(item.id, item.name);
+            loadTracks(item.id, item.name, item.artist, item.year);
         } else if ("Audio".equals(item.type)) {
             ArrayList<JellyfinClient.JellyfinItem> tracks = new ArrayList<JellyfinClient.JellyfinItem>();
             int playIdx = 0;
@@ -527,15 +582,19 @@ public class JellyfinActivity extends ListActivity {
         if (active == VIEW_ARTIST_ALBUMS) active = VIEW_ARTISTS;
         if (active == VIEW_ALBUM_TRACKS) active = -1;
 
-        mTabArtists.setTextColor(getResources().getColor(
-                active == VIEW_ARTISTS ? R.color.walkman_blue : R.color.text_tertiary));
-        mTabArtists.setTextSize(14);
-        mTabAlbums.setTextColor(getResources().getColor(
-                active == VIEW_ALBUMS ? R.color.walkman_blue : R.color.text_tertiary));
-        mTabAlbums.setTextSize(14);
-        mTabTracks.setTextColor(getResources().getColor(
-                active == VIEW_TRACKS ? R.color.walkman_blue : R.color.text_tertiary));
-        mTabTracks.setTextSize(14);
+        boolean isArtists = active == VIEW_ARTISTS;
+        boolean isAlbums = active == VIEW_ALBUMS;
+        boolean isTracks = active == VIEW_TRACKS;
+
+        int activeColor = getResources().getColor(R.color.walkman_blue);
+        int inactiveColor = getResources().getColor(R.color.text_tertiary);
+
+        mTabArtists.setTextColor(isArtists ? activeColor : inactiveColor);
+        mTabArtists.setTypeface(null, isArtists ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+        mTabAlbums.setTextColor(isAlbums ? activeColor : inactiveColor);
+        mTabAlbums.setTypeface(null, isAlbums ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+        mTabTracks.setTextColor(isTracks ? activeColor : inactiveColor);
+        mTabTracks.setTypeface(null, isTracks ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
     }
 
     private void updateNowPlayingBar() {
@@ -606,30 +665,69 @@ public class JellyfinActivity extends ListActivity {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+        int headerCount = getListView().getHeaderViewsCount();
+        int adjPos = info.position - headerCount;
         ArrayList<JellyfinClient.JellyfinItem> list = mSearchVisible ? mSearchResults : mItems;
-        if (info.position >= list.size()) return;
-        JellyfinClient.JellyfinItem item = list.get(info.position);
-        if (!"Audio".equals(item.type)) return;
+        if (adjPos < 0 || adjPos >= list.size()) return;
+        JellyfinClient.JellyfinItem item = list.get(adjPos);
 
         menu.setHeaderTitle(item.name);
-        menu.add(0, CTX_PLAY, 0, "Play");
-        menu.add(0, CTX_ADD_QUEUE, 1, "Add to Queue");
-        menu.add(0, CTX_DOWNLOAD, 2, "Download");
+        if ("Audio".equals(item.type)) {
+            menu.add(0, CTX_PLAY, 0, "Play");
+            menu.add(0, CTX_PLAY_NEXT, 1, "Play Next");
+            menu.add(0, CTX_ADD_QUEUE, 2, "Add to Queue");
+            menu.add(0, CTX_DOWNLOAD, 3, "Download");
+        } else if ("MusicAlbum".equals(item.type)) {
+            menu.add(0, CTX_PLAY_NEXT_ALBUM, 0, "Play Next");
+            menu.add(0, CTX_QUEUE_ALBUM, 1, "Add to Queue");
+            menu.add(0, CTX_DOWNLOAD_ALBUM, 2, "Download Album");
+        } else if ("MusicArtist".equals(item.type)) {
+            menu.add(0, CTX_PLAY_NEXT_ARTIST, 0, "Play Next");
+            menu.add(0, CTX_QUEUE_ARTIST, 1, "Add to Queue");
+            menu.add(0, CTX_DOWNLOAD_ARTIST, 2, "Download Artist");
+        }
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info =
                 (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        int headerCount = getListView().getHeaderViewsCount();
+        int adjPos = info.position - headerCount;
         ArrayList<JellyfinClient.JellyfinItem> list = mSearchVisible ? mSearchResults : mItems;
-        if (info.position >= list.size()) return false;
-        final JellyfinClient.JellyfinItem jfItem = list.get(info.position);
+        if (adjPos < 0 || adjPos >= list.size()) return false;
+        final JellyfinClient.JellyfinItem jfItem = list.get(adjPos);
 
         switch (item.getItemId()) {
             case CTX_PLAY:
                 ArrayList<JellyfinClient.JellyfinItem> single = new ArrayList<JellyfinClient.JellyfinItem>();
                 single.add(jfItem);
                 playJellyfinTracks(single, 0);
+                return true;
+            case CTX_PLAY_NEXT:
+                if (mBound) {
+                    MusicService.JellyfinTrack pn = new MusicService.JellyfinTrack();
+                    pn.jellyfinId = jfItem.id;
+                    pn.title = jfItem.name;
+                    pn.artist = jfItem.artist;
+                    pn.album = jfItem.album;
+                    pn.albumId = jfItem.albumId;
+                    pn.streamUrl = mClient.getStreamUrl(jfItem.id);
+                    pn.imageUrl = mClient.getImageUrl(
+                            jfItem.albumId != null ? jfItem.albumId : jfItem.id, 240);
+                    pn.durationMs = jfItem.durationMs;
+                    if (!mService.isPlaying() && mService.getQueueSize() == 0) {
+                        ArrayList<MusicService.JellyfinTrack> pnList =
+                                new ArrayList<MusicService.JellyfinTrack>();
+                        pnList.add(pn);
+                        mService.setJellyfinQueue(pnList, 0);
+                    } else {
+                        mService.addJellyfinToQueueNext(pn);
+                    }
+                    Toast.makeText(this, "Playing next", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Service not connected", Toast.LENGTH_SHORT).show();
+                }
                 return true;
             case CTX_ADD_QUEUE:
                 if (mBound) {
@@ -643,30 +741,196 @@ public class JellyfinActivity extends ListActivity {
                     jt.imageUrl = mClient.getImageUrl(
                             jfItem.albumId != null ? jfItem.albumId : jfItem.id, 240);
                     jt.durationMs = jfItem.durationMs;
-                    mService.addJellyfinToQueue(jt);
+                    if (!mService.isPlaying() && mService.getQueueSize() == 0) {
+                        ArrayList<MusicService.JellyfinTrack> queueList =
+                                new ArrayList<MusicService.JellyfinTrack>();
+                        queueList.add(jt);
+                        mService.setJellyfinQueue(queueList, 0);
+                    } else {
+                        mService.addJellyfinToQueue(jt);
+                    }
                     Toast.makeText(this, "Added to queue", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Service not connected", Toast.LENGTH_SHORT).show();
                 }
                 return true;
             case CTX_DOWNLOAD:
                 downloadTrack(jfItem);
                 return true;
+            case CTX_QUEUE_ALBUM:
+                queueAlbum(jfItem);
+                return true;
+            case CTX_PLAY_NEXT_ALBUM:
+                queueAlbumAt(jfItem, true);
+                return true;
+            case CTX_DOWNLOAD_ALBUM:
+                downloadAlbum(jfItem);
+                return true;
+            case CTX_QUEUE_ARTIST:
+                queueArtist(jfItem, false);
+                return true;
+            case CTX_PLAY_NEXT_ARTIST:
+                queueArtist(jfItem, true);
+                return true;
+            case CTX_DOWNLOAD_ARTIST:
+                downloadArtist(jfItem);
+                return true;
         }
         return false;
     }
 
+    private void queueAlbum(final JellyfinClient.JellyfinItem album) {
+        queueAlbumAt(album, false);
+    }
+
+    private void queueAlbumAt(final JellyfinClient.JellyfinItem album, final boolean playNext) {
+        if (!mBound) {
+            Toast.makeText(this, "Service not connected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Toast.makeText(this, "Loading album...", Toast.LENGTH_SHORT).show();
+        new Thread(new Runnable() {
+            public void run() {
+                final ArrayList<JellyfinClient.JellyfinItem> tracks = mClient.getTracks(album.id);
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        if (tracks == null || tracks.isEmpty()) {
+                            Toast.makeText(JellyfinActivity.this,
+                                    "No tracks found", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (!mBound) return;
+                        boolean wasEmpty = !mService.isPlaying() && mService.getQueueSize() == 0;
+                        if (wasEmpty) {
+                            playJellyfinTracks(tracks, 0);
+                        } else {
+                            addTracksToQueue(tracks, playNext);
+                            String msg = playNext ? "Playing next" : "Added " + tracks.size() + " tracks to queue";
+                            Toast.makeText(JellyfinActivity.this, msg, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private void queueArtist(final JellyfinClient.JellyfinItem artist, final boolean playNext) {
+        if (!mBound) {
+            Toast.makeText(this, "Service not connected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Toast.makeText(this, "Loading artist...", Toast.LENGTH_SHORT).show();
+        new Thread(new Runnable() {
+            public void run() {
+                ArrayList<JellyfinClient.JellyfinItem> albums =
+                        mClient.getAlbums(artist.id, "SortName", "Ascending");
+                final ArrayList<JellyfinClient.JellyfinItem> allTracks =
+                        new ArrayList<JellyfinClient.JellyfinItem>();
+                if (albums != null) {
+                    for (int a = 0; a < albums.size(); a++) {
+                        ArrayList<JellyfinClient.JellyfinItem> tracks = mClient.getTracks(albums.get(a).id);
+                        if (tracks != null) allTracks.addAll(tracks);
+                    }
+                }
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        if (allTracks.isEmpty()) {
+                            Toast.makeText(JellyfinActivity.this,
+                                    "No tracks found", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (!mBound) return;
+                        boolean wasEmpty = !mService.isPlaying() && mService.getQueueSize() == 0;
+                        if (wasEmpty) {
+                            playJellyfinTracks(allTracks, 0);
+                        } else {
+                            addTracksToQueue(allTracks, playNext);
+                            String msg = playNext ? "Playing next" : "Added " + allTracks.size() + " tracks to queue";
+                            Toast.makeText(JellyfinActivity.this, msg, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private void addTracksToQueue(ArrayList<JellyfinClient.JellyfinItem> tracks, boolean playNext) {
+        int start = playNext ? tracks.size() - 1 : 0;
+        int end = playNext ? -1 : tracks.size();
+        int step = playNext ? -1 : 1;
+        for (int i = start; i != end; i += step) {
+            JellyfinClient.JellyfinItem t = tracks.get(i);
+            MusicService.JellyfinTrack jt = new MusicService.JellyfinTrack();
+            jt.jellyfinId = t.id;
+            jt.title = t.name;
+            jt.artist = t.artist;
+            jt.album = t.album;
+            jt.albumId = t.albumId;
+            jt.streamUrl = mClient.getStreamUrl(t.id);
+            jt.imageUrl = mClient.getImageUrl(
+                    t.albumId != null ? t.albumId : t.id, 240);
+            jt.durationMs = t.durationMs;
+            if (playNext) {
+                mService.addJellyfinToQueueNext(jt);
+            } else {
+                mService.addJellyfinToQueue(jt);
+            }
+        }
+    }
+
+    private Notification buildDownloadNotification(String title, int progress, int total) {
+        Notification n = new Notification(
+                android.R.drawable.stat_sys_download,
+                "Downloading " + title,
+                System.currentTimeMillis());
+        n.flags |= Notification.FLAG_ONGOING_EVENT;
+        String text;
+        if (total <= 1) {
+            text = "Downloading...";
+        } else {
+            text = "Downloading " + progress + "/" + total;
+        }
+        android.widget.RemoteViews rv = new android.widget.RemoteViews(getPackageName(),
+                android.R.layout.simple_list_item_2);
+        rv.setTextViewText(android.R.id.text1, title);
+        rv.setTextViewText(android.R.id.text2, text);
+        n.contentView = rv;
+        return n;
+    }
+
+    private void showDownloadComplete(String title, int downloaded, int total) {
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Notification n = new Notification(
+                android.R.drawable.stat_sys_download_done,
+                "Download complete",
+                System.currentTimeMillis());
+        n.flags |= Notification.FLAG_AUTO_CANCEL;
+        String text;
+        if (total <= 1) {
+            text = downloaded > 0 ? "Download complete" : "Download failed";
+        } else {
+            text = "Downloaded " + downloaded + "/" + total + " tracks";
+        }
+        android.widget.RemoteViews rv = new android.widget.RemoteViews(getPackageName(),
+                android.R.layout.simple_list_item_2);
+        rv.setTextViewText(android.R.id.text1, title);
+        rv.setTextViewText(android.R.id.text2, text);
+        n.contentView = rv;
+        nm.notify(DOWNLOAD_NOTIFICATION_ID, n);
+    }
+
     private void downloadTrack(final JellyfinClient.JellyfinItem item) {
-        Toast.makeText(this, "Downloading...", Toast.LENGTH_SHORT).show();
+        final NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        final String title = item.name != null ? item.name : "track";
+        nm.notify(DOWNLOAD_NOTIFICATION_ID, buildDownloadNotification(title, 0, 1));
         new Thread(new Runnable() {
             public void run() {
                 String artist = item.artist != null ? item.artist : "Unknown";
                 String album = item.album != null ? item.album : "Unknown";
-                String name = item.name != null ? item.name : "track";
-                artist = sanitizeFilename(artist);
-                album = sanitizeFilename(album);
-                name = sanitizeFilename(name);
+                String name = sanitizeFilename(title);
 
                 File dir = new File(Environment.getExternalStorageDirectory(),
-                        "Music/Jellyfin/" + artist + "/" + album);
+                        "Music/Jellyfin/" + sanitizeFilename(artist) + "/" + sanitizeFilename(album));
                 final File outFile = new File(dir, name + ".mp3");
 
                 final boolean ok = mClient.downloadTrack(item.id, outFile);
@@ -676,12 +940,123 @@ public class JellyfinActivity extends ListActivity {
                             sendBroadcast(new Intent(
                                     Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
                                     Uri.fromFile(outFile)));
-                            Toast.makeText(JellyfinActivity.this,
-                                    "Downloaded", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(JellyfinActivity.this,
-                                    "Download failed", Toast.LENGTH_SHORT).show();
                         }
+                        showDownloadComplete(title, ok ? 1 : 0, 1);
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private void downloadAlbum(final JellyfinClient.JellyfinItem album) {
+        final NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        final String albumTitle = album.name != null ? album.name : "Album";
+        nm.notify(DOWNLOAD_NOTIFICATION_ID, buildDownloadNotification(albumTitle, 0, 0));
+        new Thread(new Runnable() {
+            public void run() {
+                final ArrayList<JellyfinClient.JellyfinItem> tracks = mClient.getTracks(album.id);
+                if (tracks == null || tracks.isEmpty()) {
+                    mHandler.post(new Runnable() {
+                        public void run() {
+                            nm.cancel(DOWNLOAD_NOTIFICATION_ID);
+                            Toast.makeText(JellyfinActivity.this,
+                                    "No tracks found", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    return;
+                }
+                int count = 0;
+                for (int i = 0; i < tracks.size(); i++) {
+                    JellyfinClient.JellyfinItem track = tracks.get(i);
+                    String artist = track.artist != null ? track.artist : "Unknown";
+                    String albumName = track.album != null ? track.album :
+                            (album.name != null ? album.name : "Unknown");
+                    String name = track.name != null ? track.name : "track";
+                    File dir = new File(Environment.getExternalStorageDirectory(),
+                            "Music/Jellyfin/" + sanitizeFilename(artist) + "/" + sanitizeFilename(albumName));
+                    File outFile = new File(dir, sanitizeFilename(name) + ".mp3");
+                    if (mClient.downloadTrack(track.id, outFile)) {
+                        sendBroadcast(new Intent(
+                                Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
+                                Uri.fromFile(outFile)));
+                        count++;
+                    }
+                    final int progress = i + 1;
+                    final int total = tracks.size();
+                    mHandler.post(new Runnable() {
+                        public void run() {
+                            nm.notify(DOWNLOAD_NOTIFICATION_ID,
+                                    buildDownloadNotification(albumTitle, progress, total));
+                        }
+                    });
+                }
+                final int downloaded = count;
+                final int total = tracks.size();
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        showDownloadComplete(albumTitle, downloaded, total);
+                    }
+                });
+            }
+        }).start();
+    }
+
+    private void downloadArtist(final JellyfinClient.JellyfinItem artist) {
+        final NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        final String artistTitle = artist.name != null ? artist.name : "Artist";
+        nm.notify(DOWNLOAD_NOTIFICATION_ID, buildDownloadNotification(artistTitle, 0, 0));
+        new Thread(new Runnable() {
+            public void run() {
+                ArrayList<JellyfinClient.JellyfinItem> albums =
+                        mClient.getAlbums(artist.id, "SortName", "Ascending");
+                if (albums == null || albums.isEmpty()) {
+                    mHandler.post(new Runnable() {
+                        public void run() {
+                            nm.cancel(DOWNLOAD_NOTIFICATION_ID);
+                            Toast.makeText(JellyfinActivity.this,
+                                    "No albums found", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    return;
+                }
+                int count = 0;
+                int totalTracks = 0;
+                ArrayList<JellyfinClient.JellyfinItem> allTracks = new ArrayList<JellyfinClient.JellyfinItem>();
+                for (int a = 0; a < albums.size(); a++) {
+                    JellyfinClient.JellyfinItem album = albums.get(a);
+                    ArrayList<JellyfinClient.JellyfinItem> tracks = mClient.getTracks(album.id);
+                    if (tracks != null) allTracks.addAll(tracks);
+                }
+                totalTracks = allTracks.size();
+                for (int i = 0; i < allTracks.size(); i++) {
+                    JellyfinClient.JellyfinItem track = allTracks.get(i);
+                    String trackArtist = track.artist != null ? track.artist :
+                            (artist.name != null ? artist.name : "Unknown");
+                    String albumName = track.album != null ? track.album : "Unknown";
+                    String name = track.name != null ? track.name : "track";
+                    File dir = new File(Environment.getExternalStorageDirectory(),
+                            "Music/Jellyfin/" + sanitizeFilename(trackArtist) + "/" + sanitizeFilename(albumName));
+                    File outFile = new File(dir, sanitizeFilename(name) + ".mp3");
+                    if (mClient.downloadTrack(track.id, outFile)) {
+                        sendBroadcast(new Intent(
+                                Intent.ACTION_MEDIA_SCANNER_SCAN_FILE,
+                                Uri.fromFile(outFile)));
+                        count++;
+                    }
+                    final int progress = i + 1;
+                    final int total = totalTracks;
+                    mHandler.post(new Runnable() {
+                        public void run() {
+                            nm.notify(DOWNLOAD_NOTIFICATION_ID,
+                                    buildDownloadNotification(artistTitle, progress, total));
+                        }
+                    });
+                }
+                final int downloaded = count;
+                final int total = totalTracks;
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        showDownloadComplete(artistTitle, downloaded, total);
                     }
                 });
             }

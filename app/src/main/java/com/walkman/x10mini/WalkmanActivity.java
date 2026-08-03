@@ -66,6 +66,12 @@ public class WalkmanActivity extends ListActivity {
     private static final int CTX_ADD_PLAYLIST = 22;
     private static final int CTX_SET_RINGTONE = 23;
     private static final int CTX_DELETE = 24;
+    private static final int CTX_PLAY_NEXT = 25;
+    private static final int CTX_ADD_QUEUE = 26;
+    private static final int CTX_PLAY_NEXT_ALBUM = 27;
+    private static final int CTX_ADD_QUEUE_ALBUM = 28;
+    private static final int CTX_PLAY_NEXT_ARTIST = 29;
+    private static final int CTX_ADD_QUEUE_ARTIST = 30;
 
     private static final int PL_TYPE_CREATE = 0;
     private static final int PL_TYPE_FAVOURITES = 1;
@@ -109,6 +115,7 @@ public class WalkmanActivity extends ListActivity {
     private TextView mSortDirection;
     private TextView mViewToggle;
     private GridView mGridView;
+    private View mAlbumHeader;
 
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName name, IBinder binder) {
@@ -278,6 +285,9 @@ public class WalkmanActivity extends ListActivity {
         }
 
         registerForContextMenu(getListView());
+        if (mGridView != null) {
+            registerForContextMenu(mGridView);
+        }
         getListView().setFastScrollEnabled(true);
 
         Intent intent = getIntent();
@@ -348,6 +358,7 @@ public class WalkmanActivity extends ListActivity {
         mIsPlaylistTracks = false;
         mSmartPlaylistIds = null;
         hideFilterBar();
+        removeAlbumHeader();
         setTitle("Walkman - Songs");
         if (mCursor != null && !mCursor.isClosed()) mCursor.close();
 
@@ -377,6 +388,7 @@ public class WalkmanActivity extends ListActivity {
         mCurrentView = MENU_VIEW_ALBUMS;
         mIsPlaylistTracks = false;
         mSmartPlaylistIds = null;
+        removeAlbumHeader();
         setTitle("Walkman - Albums");
         if (mGridView != null) mGridView.setAdapter(null);
         if (mCursor != null && !mCursor.isClosed()) mCursor.close();
@@ -462,6 +474,7 @@ public class WalkmanActivity extends ListActivity {
     private void loadArtistsList() {
         mCurrentView = MENU_VIEW_ARTISTS;
         hideFilterBar();
+        removeAlbumHeader();
         setTitle("Walkman - Artists");
         if (mCursor != null && !mCursor.isClosed()) mCursor.close();
 
@@ -490,6 +503,7 @@ public class WalkmanActivity extends ListActivity {
         mCurrentView = MENU_VIEW_PLAYLISTS;
         mIsPlaylistTracks = false;
         mSmartPlaylistIds = null;
+        removeAlbumHeader();
         hideFilterBar();
         setTitle("Walkman - Playlists");
         if (mCursor != null && !mCursor.isClosed()) mCursor.close();
@@ -535,7 +549,8 @@ public class WalkmanActivity extends ListActivity {
             return;
         }
         if (mCurrentView == MENU_VIEW_SONGS) {
-            playSongsFromPosition(position);
+            int headerCount = getListView().getHeaderViewsCount();
+            playSongsFromPosition(position - headerCount);
         } else if (mCurrentView == MENU_VIEW_ALBUMS) {
             loadAlbumTracks(id);
         } else if (mCurrentView == MENU_VIEW_ARTISTS) {
@@ -598,7 +613,45 @@ public class WalkmanActivity extends ListActivity {
         mIsPlaylistTracks = false;
         mSmartPlaylistIds = null;
         hideFilterBar();
+        removeAlbumHeader();
         if (mCursor != null && !mCursor.isClosed()) mCursor.close();
+
+        String albumName = null;
+        String albumArtist = null;
+        int albumYear = 0;
+        Cursor ac = getContentResolver().query(
+                MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                new String[]{
+                        MediaStore.Audio.Albums.ALBUM,
+                        MediaStore.Audio.Albums.ARTIST,
+                        MediaStore.Audio.Albums.FIRST_YEAR
+                },
+                MediaStore.Audio.Albums._ID + "=?",
+                new String[]{String.valueOf(albumId)}, null);
+        if (ac != null) {
+            if (ac.moveToFirst()) {
+                albumName = ac.getString(0);
+                albumArtist = ac.getString(1);
+                albumYear = ac.getInt(2);
+            }
+            ac.close();
+        }
+
+        mAlbumHeader = getLayoutInflater().inflate(R.layout.album_header, null);
+        ((TextView) mAlbumHeader.findViewById(R.id.header_album_name))
+                .setText(albumName != null ? albumName : "Unknown Album");
+        ((TextView) mAlbumHeader.findViewById(R.id.header_album_artist))
+                .setText(albumArtist != null ? albumArtist : "Unknown Artist");
+        TextView yearView = (TextView) mAlbumHeader.findViewById(R.id.header_album_year);
+        if (albumYear > 0) {
+            yearView.setText(String.valueOf(albumYear));
+        } else {
+            yearView.setVisibility(View.GONE);
+        }
+        loadAlbumArtInto(
+                (ImageView) mAlbumHeader.findViewById(R.id.header_album_art), albumId);
+        setListAdapter(null);
+        getListView().addHeaderView(mAlbumHeader, null, false);
 
         mCursor = getContentResolver().query(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -614,7 +667,7 @@ public class WalkmanActivity extends ListActivity {
 
         if (mCursor != null) {
             startManagingCursor(mCursor);
-            setTitle("Walkman - Album Tracks");
+            setTitle(albumName != null ? albumName : "Album Tracks");
             SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
                     R.layout.list_item_track,
                     mCursor,
@@ -624,11 +677,19 @@ public class WalkmanActivity extends ListActivity {
         }
     }
 
+    private void removeAlbumHeader() {
+        if (mAlbumHeader != null) {
+            getListView().removeHeaderView(mAlbumHeader);
+            mAlbumHeader = null;
+        }
+    }
+
     private void loadArtistTracks(long artistId) {
         mCurrentView = MENU_VIEW_SONGS;
         mIsPlaylistTracks = false;
         mSmartPlaylistIds = null;
         hideFilterBar();
+        removeAlbumHeader();
         if (mCursor != null && !mCursor.isClosed()) mCursor.close();
 
         mCursor = getContentResolver().query(
@@ -660,6 +721,7 @@ public class WalkmanActivity extends ListActivity {
         mIsPlaylistTracks = true;
         mSmartPlaylistIds = null;
         hideFilterBar();
+        removeAlbumHeader();
         if (mCursor != null && !mCursor.isClosed()) mCursor.close();
 
         Uri uri = MediaStore.Audio.Playlists.Members.getContentUri("external", playlistId);
@@ -750,12 +812,22 @@ public class WalkmanActivity extends ListActivity {
             menu.setHeaderTitle("Track Options");
             menu.add(0, CTX_PLAY, 0, "Play")
                     .setIcon(android.R.drawable.ic_media_play);
-            menu.add(0, CTX_EDIT_INFO, 1, "Edit Info")
+            menu.add(0, CTX_PLAY_NEXT, 1, "Play Next");
+            menu.add(0, CTX_ADD_QUEUE, 2, "Add to Queue");
+            menu.add(0, CTX_EDIT_INFO, 3, "Edit Info")
                     .setIcon(R.drawable.music_menu_edit_music_info);
-            menu.add(0, CTX_ADD_PLAYLIST, 2, "Add to Playlist");
-            menu.add(0, CTX_SET_RINGTONE, 3, "Set as Ringtone");
-            menu.add(0, CTX_DELETE, 4, "Delete")
+            menu.add(0, CTX_ADD_PLAYLIST, 4, "Add to Playlist");
+            menu.add(0, CTX_SET_RINGTONE, 5, "Set as Ringtone");
+            menu.add(0, CTX_DELETE, 6, "Delete")
                     .setIcon(R.drawable.music_menu_delete_playlist);
+        } else if (mCurrentView == MENU_VIEW_ALBUMS) {
+            menu.setHeaderTitle("Album Options");
+            menu.add(0, CTX_PLAY_NEXT_ALBUM, 0, "Play Next");
+            menu.add(0, CTX_ADD_QUEUE_ALBUM, 1, "Add to Queue");
+        } else if (mCurrentView == MENU_VIEW_ARTISTS) {
+            menu.setHeaderTitle("Artist Options");
+            menu.add(0, CTX_PLAY_NEXT_ARTIST, 0, "Play Next");
+            menu.add(0, CTX_ADD_QUEUE_ARTIST, 1, "Add to Queue");
         }
     }
 
@@ -770,8 +842,24 @@ public class WalkmanActivity extends ListActivity {
         switch (item.getItemId()) {
             case CTX_PLAY: {
                 if (mCursor != null) {
-                    mCursor.moveToPosition(info.position);
-                    playSongsFromPosition(info.position);
+                    int hc = getListView().getHeaderViewsCount();
+                    int pos = info.position - hc;
+                    mCursor.moveToPosition(pos);
+                    playSongsFromPosition(pos);
+                }
+                return true;
+            }
+            case CTX_PLAY_NEXT: {
+                if (mBound) {
+                    mService.addToQueueNext(trackId);
+                    Toast.makeText(this, "Playing next", Toast.LENGTH_SHORT).show();
+                }
+                return true;
+            }
+            case CTX_ADD_QUEUE: {
+                if (mBound) {
+                    mService.addToQueue(trackId);
+                    Toast.makeText(this, "Added to queue", Toast.LENGTH_SHORT).show();
                 }
                 return true;
             }
@@ -793,6 +881,22 @@ public class WalkmanActivity extends ListActivity {
                 confirmDelete(trackId);
                 return true;
             }
+            case CTX_PLAY_NEXT_ALBUM: {
+                queueLocalAlbum(trackId, true);
+                return true;
+            }
+            case CTX_ADD_QUEUE_ALBUM: {
+                queueLocalAlbum(trackId, false);
+                return true;
+            }
+            case CTX_PLAY_NEXT_ARTIST: {
+                queueLocalArtist(trackId, true);
+                return true;
+            }
+            case CTX_ADD_QUEUE_ARTIST: {
+                queueLocalArtist(trackId, false);
+                return true;
+            }
         }
         return super.onContextItemSelected(item);
     }
@@ -811,6 +915,66 @@ public class WalkmanActivity extends ListActivity {
                 loadSongsList();
             } else if (mCurrentView == MENU_VIEW_ALBUMS) {
                 loadAlbumsList();
+            }
+        }
+    }
+
+    private void queueLocalAlbum(long albumId, boolean playNext) {
+        if (!mBound) return;
+        Cursor c = getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                new String[]{MediaStore.Audio.Media._ID},
+                MediaStore.Audio.Media.ALBUM_ID + "=? AND " +
+                        MediaStore.Audio.Media.IS_MUSIC + "=1",
+                new String[]{String.valueOf(albumId)},
+                MediaStore.Audio.Media.TRACK + " ASC");
+        if (c != null) {
+            ArrayList<Long> ids = new ArrayList<Long>();
+            while (c.moveToNext()) {
+                ids.add(c.getLong(0));
+            }
+            c.close();
+            if (playNext) {
+                for (int i = ids.size() - 1; i >= 0; i--) {
+                    mService.addToQueueNext(ids.get(i));
+                }
+                Toast.makeText(this, "Playing next", Toast.LENGTH_SHORT).show();
+            } else {
+                for (int i = 0; i < ids.size(); i++) {
+                    mService.addToQueue(ids.get(i));
+                }
+                Toast.makeText(this, "Added " + ids.size() + " tracks to queue",
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void queueLocalArtist(long artistId, boolean playNext) {
+        if (!mBound) return;
+        Cursor c = getContentResolver().query(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                new String[]{MediaStore.Audio.Media._ID},
+                MediaStore.Audio.Media.ARTIST_ID + "=? AND " +
+                        MediaStore.Audio.Media.IS_MUSIC + "=1",
+                new String[]{String.valueOf(artistId)},
+                MediaStore.Audio.Media.TITLE + " ASC");
+        if (c != null) {
+            ArrayList<Long> ids = new ArrayList<Long>();
+            while (c.moveToNext()) {
+                ids.add(c.getLong(0));
+            }
+            c.close();
+            if (playNext) {
+                for (int i = ids.size() - 1; i >= 0; i--) {
+                    mService.addToQueueNext(ids.get(i));
+                }
+                Toast.makeText(this, "Playing next", Toast.LENGTH_SHORT).show();
+            } else {
+                for (int i = 0; i < ids.size(); i++) {
+                    mService.addToQueue(ids.get(i));
+                }
+                Toast.makeText(this, "Added " + ids.size() + " tracks to queue",
+                        Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -1256,6 +1420,7 @@ public class WalkmanActivity extends ListActivity {
     private void loadTracksById(ArrayList<Long> trackIds, String title) {
         mCurrentView = MENU_VIEW_SONGS;
         mIsPlaylistTracks = false;
+        removeAlbumHeader();
         hideFilterBar();
         if (mCursor != null && !mCursor.isClosed()) mCursor.close();
         mCursor = null;
@@ -1309,6 +1474,7 @@ public class WalkmanActivity extends ListActivity {
         mIsPlaylistTracks = false;
         mSmartPlaylistIds = null;
         hideFilterBar();
+        removeAlbumHeader();
         setTitle("Walkman - Recently added");
         if (mCursor != null && !mCursor.isClosed()) mCursor.close();
 
