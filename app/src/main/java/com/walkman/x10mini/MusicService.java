@@ -106,6 +106,13 @@ public class MusicService extends Service implements
     private Runnable mGaplessChecker = new Runnable() {
         public void run() {
             if (!mIsPrepared || !mIsPlaying || mRepeatMode == 2) return;
+            if (mJellyfinSeekOffset > 0 && mSavedDuration > 0) {
+                int pos = getCurrentPosition();
+                if (pos >= mSavedDuration - 1500 || !mPlayer.isPlaying()) {
+                    onCompletion(mPlayer);
+                    return;
+                }
+            }
             int remaining = mPlayer.getDuration() - mPlayer.getCurrentPosition();
             if (remaining < 5000 && remaining > 0 && mNextPlayer == null) {
                 prepareNextTrack();
@@ -402,9 +409,11 @@ public class MusicService extends Service implements
             return;
         }
         mIsPrepared = true;
-        int playerDur = mp.getDuration();
-        if (playerDur > 0) {
-            mSavedDuration = playerDur;
+        if (mJellyfinSeekOffset == 0) {
+            int playerDur = mp.getDuration();
+            if (playerDur > 0) {
+                mSavedDuration = playerDur;
+            }
         }
         if (mPendingSeek > 0) {
             mp.seekTo(mPendingSeek);
