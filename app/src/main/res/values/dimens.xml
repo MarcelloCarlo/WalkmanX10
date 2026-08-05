@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Player -->
+    <dimen name="player_control_button_margin">48dp</dimen>
+    <dimen name="player_track_position_margin">7dp</dimen>
+    <dimen name="player_track_position_margin_right">18dp</dimen>
+    <dimen name="player_track_position_big_size">60dp</dimen>
+    <dimen name="player_track_position_big_horizontal_padding">20dp</dimen>
+    <dimen name="player_repeat_shuffle_indicator_right_margin">4dp</dimen>
+    <dimen name="player_left_margin">16dp</dimen>
+    <dimen name="player_no_content_message_box_width">230dp</dimen>
+    <dimen name="player_no_content_text1_size">30dp</dimen>
+    <dimen name="player_no_content_text2_top_margin">4dp</dimen>
+    <dimen name="player_no_content_seekbar_margin">34dp</dimen>
+    <dimen name="player_no_content_buttons_margin">15dp</dimen>
+
+    <!-- List items -->
+    <dimen name="listitem_height">87dp</dimen>
+    <dimen name="listitem_image_size">67dp</dimen>
+    <dimen name="listitem_image_margin_left_right">7dp</dimen>
+    <dimen name="listitem_main_text_top_margin">4dp</dimen>
+    <dimen name="listitem_two_textlines_main_text_top_margin">10dp</dimen>
+    <dimen name="listitem_text_side_margin">7dp</dimen>
+    <dimen name="list_item_image_max_size">47dp</dimen>
+    <dimen name="list_item_margin_between_textview">3dp</dimen>
+    <dimen name="list_item_divider_text_min_height">25dp</dimen>
+
+    <!-- Typography -->
+    <dimen name="listitem_text1_size">20sp</dimen>
+    <dimen name="listitem_text2_size">13sp</dimen>
+    <dimen name="library_header_text_size">20dp</dimen>
+    <dimen name="semc_text_size_extra_small">12sp</dimen>
+
+    <!-- Spacing -->
+    <dimen name="min_padding">6dp</dimen>
+    <dimen name="normal_padding">8dp</dimen>
+    <dimen name="medium_padding">10dp</dimen>
+    <dimen name="icon_image_size">48dp</dimen>
+
+    <!-- Album details -->
+    <dimen name="album_details_albumart_group_layout_padding">13dp</dimen>
+    <dimen name="album_details_side_margin">14dp</dimen>
+    <dimen name="library_header_text1_height">12dp</dimen>
+
+    <!-- Notification -->
+    <dimen name="statusbar_padding_side">5dp</dimen>
+    <dimen name="statusbar_buttons_padding_left">7dp</dimen>
+    <dimen name="statusbar_buttons_padding_right">7dp</dimen>
+    <dimen name="statusbar_info_padding_top">10dp</dimen>
+    <dimen name="statusbar_info_icon_width">25dp</dimen>
+    <dimen name="statusbar_info_icon_height">25dp</dimen>
+    <dimen name="statusbar_info_padding_left">4dp</dimen>
+
+    <!-- Play queue -->
+    <dimen name="listitem_pq_margin_bottom">2dp</dimen>
+    <dimen name="play_queue_save_button_width">143dp</dimen>
+
+    <!-- Options overlay -->
+    <dimen name="options_overlay_menu_icon_margin">10dp</dimen>
+</resources>

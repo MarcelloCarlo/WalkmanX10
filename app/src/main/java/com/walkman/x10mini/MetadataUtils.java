@@ -36,27 +36,35 @@ public class MetadataUtils {
                 query += " AND artist:\"" + artist + "\"";
             }
             String encoded = URLEncoder.encode(query, "UTF-8");
-            String urlStr = "http://musicbrainz.org/ws/2/recording/?query="
-                    + encoded + "&limit=1&fmt=json";
 
-            HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
-            conn.setRequestProperty("User-Agent",
-                    "WalkmanX10Mini/5.1.0 (walkman-backport)");
-            conn.setConnectTimeout(10000);
-            conn.setReadTimeout(10000);
-
-            if (conn.getResponseCode() == 200) {
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(conn.getInputStream(), "UTF-8"));
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
+            if (TlsHelper.isAvailable()) {
+                String urlStr = "https://musicbrainz.org/ws/2/recording/?query="
+                        + encoded + "&limit=1&fmt=json";
+                TlsHelper.Response resp = TlsHelper.httpsGet(urlStr);
+                if (resp != null && resp.statusCode == 200) {
+                    parseResult(resp.body, result);
                 }
-                reader.close();
-                parseResult(sb.toString(), result);
+            } else {
+                String urlStr = "http://musicbrainz.org/ws/2/recording/?query="
+                        + encoded + "&limit=1&fmt=json";
+                HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
+                conn.setRequestProperty("User-Agent",
+                        "WalkmanX10Mini/5.1.0 (walkman-backport)");
+                conn.setConnectTimeout(10000);
+                conn.setReadTimeout(10000);
+                if (conn.getResponseCode() == 200) {
+                    BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(conn.getInputStream(), "UTF-8"));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        sb.append(line);
+                    }
+                    reader.close();
+                    parseResult(sb.toString(), result);
+                }
+                conn.disconnect();
             }
-            conn.disconnect();
         } catch (Exception e) {
         }
         return result;
@@ -321,7 +329,50 @@ public class MetadataUtils {
         return null;
     }
 
+    public static class LyricsResult {
+        public String plainLyrics;
+        public String syncedLyrics;
+    }
+
+    public static LyricsResult fetchLyricsLrclib(String title, String artist,
+                                                  String album, int durationSec) {
+        if (!TlsHelper.isAvailable()) return null;
+        try {
+            StringBuilder url = new StringBuilder("https://lrclib.net/api/get?");
+            url.append("track_name=").append(TlsHelper.urlEncode(title));
+            url.append("&artist_name=").append(TlsHelper.urlEncode(artist));
+            if (album != null && album.length() > 0) {
+                url.append("&album_name=").append(TlsHelper.urlEncode(album));
+            }
+            if (durationSec > 0) {
+                url.append("&duration=").append(durationSec);
+            }
+
+            TlsHelper.Response resp = TlsHelper.httpsGet(url.toString());
+            if (resp == null || resp.statusCode != 200) return null;
+
+            LyricsResult result = new LyricsResult();
+            result.syncedLyrics = extractJsonString(resp.body, "syncedLyrics");
+            result.plainLyrics = extractJsonString(resp.body, "plainLyrics");
+
+            if ((result.syncedLyrics == null || result.syncedLyrics.length() == 0)
+                    && (result.plainLyrics == null || result.plainLyrics.length() == 0)) {
+                return null;
+            }
+            return result;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public static String fetchLyrics(String title, String artist) {
+        if (TlsHelper.isAvailable()) {
+            LyricsResult lr = fetchLyricsLrclib(title, artist, null, 0);
+            if (lr != null) {
+                return lr.syncedLyrics != null ? lr.syncedLyrics : lr.plainLyrics;
+            }
+        }
+
         try {
             String encoded = "artist=" + java.net.URLEncoder.encode(artist, "UTF-8")
                     + "&song=" + java.net.URLEncoder.encode(title, "UTF-8");
@@ -370,7 +421,11 @@ public class MetadataUtils {
                     String location = conn.getHeaderField("Location");
                     conn.disconnect();
                     if (location == null) return null;
-                    url = location.replace("https://", "http://");
+                    if (!TlsHelper.isAvailable()) {
+                        url = location.replace("https://", "http://");
+                    } else {
+                        url = location;
+                    }
                 } else {
                     return conn;
                 }

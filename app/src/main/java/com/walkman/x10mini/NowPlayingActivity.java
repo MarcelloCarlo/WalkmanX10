@@ -612,7 +612,32 @@ public class NowPlayingActivity extends Activity implements View.OnClickListener
                     }
                 }
 
-                final String lyrics = MetadataUtils.fetchLyrics(title, artist);
+                String album = mService.getAlbum();
+                int durationSec = mService.getDuration() / 1000;
+                MetadataUtils.LyricsResult lr = MetadataUtils.fetchLyricsLrclib(
+                        title, artist, album, durationSec);
+
+                if (lr != null && lr.syncedLyrics != null && lr.syncedLyrics.length() > 0) {
+                    final ArrayList<LrcParser.LrcLine> parsed = LrcParser.parse(lr.syncedLyrics);
+                    if (parsed.size() > 0) {
+                        mHandler.post(new Runnable() {
+                            public void run() {
+                                mLyricsLoaded = true;
+                                mLrcLines = parsed;
+                                mCurrentLyrics = null;
+                                if (mLyricsVisible) showSyncedLyrics();
+                            }
+                        });
+                        return;
+                    }
+                }
+
+                final String lyrics;
+                if (lr != null && lr.plainLyrics != null && lr.plainLyrics.length() > 0) {
+                    lyrics = lr.plainLyrics;
+                } else {
+                    lyrics = MetadataUtils.fetchLyrics(title, artist);
+                }
                 mHandler.post(new Runnable() {
                     public void run() {
                         mLyricsLoaded = true;

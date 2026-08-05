@@ -142,6 +142,7 @@ public class WalkmanActivity extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        TlsHelper.init(this);
         setContentView(R.layout.activity_main);
 
         mNowPlayingBar = (TextView) findViewById(R.id.now_playing_bar);

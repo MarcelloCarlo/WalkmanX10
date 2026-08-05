@@ -12,3 +12,9 @@ local.properties
 # OS
 .DS_Store
 Thumbs.db
+
+# wolfSSL source (cloned during CI build)
+app/src/main/jni/wolfssl/
+
+# NDK build intermediates
+app/src/main/jni/obj/

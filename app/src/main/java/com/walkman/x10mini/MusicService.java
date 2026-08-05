@@ -155,6 +155,7 @@ public class MusicService extends Service implements
     @Override
     public void onCreate() {
         super.onCreate();
+        TlsHelper.init(this);
         mPlayer = new MediaPlayer();
         mPlayer.setOnCompletionListener(this);
         mPlayer.setOnErrorListener(this);

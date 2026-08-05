@@ -3,6 +3,35 @@
     <style name="WalkmanTheme" parent="@android:style/Theme.Black.NoTitleBar">
         <item name="android:windowBackground">@color/background</item>
         <item name="android:colorBackground">@color/background</item>
+        <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:listDivider">@color/divider</item>
+    </style>
+
+    <style name="MusicAppTextAppearanceSmall" parent="@android:style/TextAppearance.Small">
+    </style>
+
+    <style name="MusicAppTextAppearanceExtraSmall" parent="@style/MusicAppTextAppearanceSmall">
+        <item name="android:textSize">@dimen/semc_text_size_extra_small</item>
+    </style>
+
+    <style name="MusicAppTextAppearanceSmallSecondary" parent="@style/MusicAppTextAppearanceSmall">
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
+    <style name="MusicAppTextAppearanceExtraSmallSecondary" parent="@style/MusicAppTextAppearanceSmall">
+        <item name="android:textSize">@dimen/semc_text_size_extra_small</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
+    <style name="MusicAppTextAppearanceMedium" parent="@android:style/TextAppearance.Medium">
+    </style>
+
+    <style name="MusicAppTextAppearanceLarge" parent="@android:style/TextAppearance.Large">
+    </style>
+
+    <style name="PaddedListView" parent="@android:style/Widget.ListView">
+        <item name="android:scrollbarStyle">outsideOverlay</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
     </style>
 </resources>

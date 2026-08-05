@@ -1,4 +1,166 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Walkman</string>
+    <string name="music_app_name_walkman_txt">WALKMAN</string>
+
+    <!-- Common UI -->
+    <string name="gui_cancel_txt">Cancel</string>
+    <string name="gui_delete_txt">Delete</string>
+    <string name="gui_ok_txt">OK</string>
+    <string name="gui_send_txt">Send</string>
+
+    <!-- Tabs / Navigation -->
+    <string name="tile_artists">Artists</string>
+    <string name="tile_albums">Albums</string>
+    <string name="tile_tracks">Tracks</string>
+    <string name="tile_playlists">Playlists</string>
+    <string name="music_tab_nowplaying_ics">Playing</string>
+    <string name="music_tab_mymusic_ics">My music</string>
+
+    <!-- Headers -->
+    <string name="portal_header">My music</string>
+    <string name="artists_header">Artists</string>
+    <string name="albums_header">Albums</string>
+    <string name="album_header">Album</string>
+    <string name="tracks_header">Tracks</string>
+    <string name="playlists_header">Playlists</string>
+    <string name="playqueue_header">Play queue</string>
+    <string name="choose_playlist_header">Select playlist</string>
+
+    <!-- Unknown -->
+    <string name="music_library_unknown_album_txt">Unknown album</string>
+    <string name="music_library_unknown_artist_txt">Unknown artist</string>
+    <string name="music_unknown_track">Unknown track</string>
+
+    <!-- Queue -->
+    <string name="music_library_enqueue_album_txt">Queue album</string>
+    <string name="music_library_enqueue_artist_txt">Queue artist</string>
+    <string name="music_library_enqueue_playlist_txt">Queue playlist</string>
+    <string name="music_library_enqueue_track_txt">Queue track</string>
+    <string name="music_toast_enqueue_track">Track queued</string>
+    <string name="music_toast_enqueue_album">Album queued</string>
+    <string name="music_toast_enqueue_artist">Artist queued</string>
+    <string name="music_toast_enqueue_playlist">Playlist queued</string>
+    <string name="music_remove_from_queue_txt">Delete from Now playing</string>
+    <string name="overlay_view_playqueue_title">Play queue</string>
+    <string name="overlay_view_playqueue">View play queue</string>
+
+    <!-- Playback errors -->
+    <string name="music_playback_service_error_generic_failure_txt">Cannot play track</string>
+    <string name="music_playback_service_error_media_security_txt">Cannot play track due to insufficient rights</string>
+    <string name="music_playback_service_error_media_unknown_txt">Cannot play track. Unsupported file format.</string>
+    <string name="error_dialog_title">Error</string>
+
+    <!-- Shuffle / Repeat -->
+    <string name="music_shuffle_all_txt">Shuffle all</string>
+    <string name="shuffle_tracks_count">Shuffle all %1$d tracks</string>
+    <string name="music_shuffle_dialog_title">Set shuffle mode</string>
+    <string name="music_shuffle_menu_option_ics">Shuffle mode</string>
+    <string name="shuffle_off">Shuffle off</string>
+    <string name="shuffle_on">Shuffle on</string>
+    <string name="music_repeat_dialog_title">Set repeat mode</string>
+    <string name="music_repeat_menu_option_ics">Repeat mode</string>
+    <string name="repeat_all">Repeat all</string>
+    <string name="repeat_one">Repeat one</string>
+    <string name="repeat_none">Repeat off</string>
+
+    <!-- Playlists -->
+    <string name="music_playlist_picker_strings_name_txt">Select playlist</string>
+    <string name="music_playlist_new_playlist_txt">Create new playlist</string>
+    <string name="music_playlist_new_playlist_name_txt">Create new playlist</string>
+    <string name="music_playlist_name_txt">Name</string>
+    <string name="music_playlist_save_created">Save</string>
+    <string name="music_playlist_save">Save</string>
+    <string name="music_playlist_delete_playlist_ics">Delete playlist</string>
+    <string name="music_playlist_edit">Edit playlist</string>
+    <string name="music_playlist_edit_ics">Edit playlist</string>
+    <string name="music_playlist_addtrack">Add tracks</string>
+    <string name="music_playlist_addtrack_description">Tap to add new tracks</string>
+    <string name="music_playlist_created">Created: %1$s</string>
+    <string name="music_playlist_rename">Rename playlist</string>
+    <string name="music_playlist_added">%1$s added to %2$s</string>
+    <string name="music_playlist_addto">Add to playlist</string>
+    <string name="music_playlist_removefrom">Delete from playlist</string>
+    <string name="music_playlist_playlistname">My playlist</string>
+    <string name="music_playlist_most_played_txt">Most played</string>
+    <string name="music_playlist_most_played_description">Frequently played tracks</string>
+    <string name="music_playlist_never_played_txt">Never played</string>
+    <string name="music_playlist_never_played_description">Tracks never played</string>
+    <string name="music_playlist_newly_added_txt">Newly added</string>
+    <string name="music_playlist_newly_added_description">New tracks</string>
+    <string name="music_playlist_favourites">My favorites</string>
+    <string name="music_playlist_favourites_description">Starred tracks</string>
+    <string name="music_playlist_createplaylist_description">Tap to create new playlist</string>
+    <string name="music_custom_playlist">Custom playlist</string>
+
+    <!-- Search -->
+    <string name="menu_search">Search</string>
+    <string name="search_nomatches">No match</string>
+    <string name="search_hint">Search music</string>
+    <string name="search_results">Search results</string>
+    <string name="search_artist">Artist</string>
+    <string name="search_settings_description">Artists, albums and tracks.</string>
+    <string name="music_voice_search_not_found">\"%1$s\" not found</string>
+
+    <!-- Menu -->
+    <string name="menu_equalizer_ics">Sound enhancements</string>
+    <string name="mc_download_music_info_ics">Download music info</string>
+    <string name="mc_edit_music_info_ics">Edit music info</string>
+    <string name="music_ics_menu_save">Save</string>
+
+    <!-- Delete -->
+    <string name="music_delete_header">Delete</string>
+    <string name="music_delete_question">Delete %1$s?</string>
+
+    <!-- Ringtone -->
+    <string name="ringtone">Set as ringtone</string>
+    <string name="music_set_ringtone">Used as ringtone: %1$s</string>
+    <string name="music_cannot_set_ringtone">Cannot set track as ringtone. Unsupported file format.</string>
+
+    <!-- Favorites -->
+    <string name="overlay_favorites_add_title">Add to favorites</string>
+    <string name="overlay_favorites_add">Add this track to favorites</string>
+    <string name="overlay_favorites_remove_title">Favorite</string>
+    <string name="overlay_favorites_remove">This track is a favorite</string>
+    <string name="toast_added_to_favourites">Added to favorites</string>
+    <string name="toast_removed_from_favourites">Removed from favorites</string>
+
+    <!-- No content -->
+    <string name="no_content_message_line1">No music</string>
+    <string name="no_content_message_line2">Transfer music tracks to the phone</string>
+    <string name="music_strings_nocontent_txt">No content available</string>
+    <string name="music_library_empty_txt">Music library empty</string>
+
+    <!-- Library -->
+    <string name="music_library_n_tracks_txt">Tracks: %1$d</string>
+    <string name="music_updating_library_txt">Updating music library</string>
+    <string name="music_strings_artist_book_loading_txt">Loading</string>
+
+    <!-- Player -->
+    <string name="music_player_unknown_total_track_duration_txt">00:00</string>
+    <string name="music_player_invalid_time_txt">0:00</string>
+    <string name="music_no_content_track_time">00:00</string>
+
+    <!-- Shortcuts -->
+    <string name="music_shortcut_playlist">Playlist</string>
+    <string name="music_shortcut_track">Track</string>
+    <string name="music_shortcut_album">Album</string>
+    <string name="music_shortcut_artist">Artist</string>
+    <string name="musicshortcutlabel">Artist</string>
+    <string name="musicshortcutlabelalbum">Album</string>
+    <string name="musicshortcutlabelplaylist">Playlist</string>
+
+    <!-- Accessibility -->
+    <string name="description_play_button">Play</string>
+    <string name="description_next_button">Next</string>
+    <string name="description_prev_button">Previous</string>
+    <string name="description_pause_button">Pause</string>
+    <string name="description_back_button">Back</string>
+    <string name="description_track_changed">Track changed</string>
+    <string name="description_album_flickview">Album art. Tap for menu. Swipe to change track.</string>
+
+    <!-- Jellyfin (new - no original translations) -->
+    <string name="jellyfin_search_hint">Search Jellyfin...</string>
+    <string name="jellyfin_not_configured">Not configured</string>
+    <string name="widget_not_playing">Not playing</string>
 </resources>

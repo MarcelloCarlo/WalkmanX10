@@ -12,4 +12,14 @@
     <color name="divider">#ff2d2d2d</color>
     <color name="seekbar_bg">#ff333333</color>
     <color name="now_playing_bar">#cc000000</color>
+
+    <!-- Original Walkman theme colors -->
+    <color name="actionbar_bg">#da000000</color>
+    <color name="player_album_name">#80fefefe</color>
+    <color name="tile_main_color">#ebebeb</color>
+    <color name="tile_secondary_color">#a2a2a2</color>
+    <color name="tile_overlay_color">#b3000000</color>
+    <color name="track_duration">#bababa</color>
+    <color name="no_content_gray">#4b4b4b</color>
+    <color name="moving_item_background">#667777ff</color>
 </resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="music_toast_hint_download_pending_message_txt">Starting download…</string>
+    <string name="album_header">Album </string>
+    <string name="music_playlist_favourites">My favourites</string>
+    <string name="overlay_favorites_add_title">Add to favourites</string>
+    <string name="overlay_favorites_add">Add this track to favourites</string>
+    <string name="overlay_favorites_remove_title">Favourite</string>
+    <string name="overlay_favorites_remove">This track is a favourite</string>
+    <string name="toast_added_to_favourites">Added to favourites</string>
+    <string name="toast_removed_from_favourites">Removed from favourites</string>
+    <string name="music_playlist_sensme_channels_how_to_information">You can download SensMe data for your tracks by selecting Download music info in the Options menu.</string>
+    <string name="description_infinite_button">Inifinite</string>
+    <string name="tile_friends_music">Friends’ music</string>
+    <string name="menu_visualizer">Visualiser</string>
+</resources>
