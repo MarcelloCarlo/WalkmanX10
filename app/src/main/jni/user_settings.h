@@ -17,9 +17,8 @@
 #define HAVE_SUPPORTED_CURVES
 #define HAVE_EXTENDED_MASTER
 
-/* Ciphers */
-#define HAVE_AESGCM
-#define HAVE_AESCCM
+/* Ciphers — AES-GCM disabled: auth tag check fails on ARMv6 (alignment issue) */
+#define NO_AES
 #define HAVE_ECC
 #define HAVE_CURVE25519
 #define HAVE_ED25519
@@ -46,6 +45,7 @@
 #define NO_PSK
 #define NO_RC4
 #define NO_DES3
+#define NO_PWDBASED
 
 /* System CA certs */
 #define WOLFSSL_SYS_CA_CERTS

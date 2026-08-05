@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <arpa/inet.h>
 #include <android/log.h>
 
 #include "user_settings.h"
@@ -63,21 +64,28 @@ Java_com_walkman_x10mini_WolfSSLNative_nativeCleanup(JNIEnv *env, jclass cls) {
     wolfSSL_Cleanup();
 }
 
-static int tcp_connect(const char *host, int port) {
-    struct hostent *hp;
+static int tcp_connect(const char *host, const char *connectAddr, int port) {
     struct sockaddr_in addr;
     int sockfd;
-
-    hp = gethostbyname(host);
-    if (hp == NULL) {
-        LOGE("gethostbyname(%s) failed", host);
-        return -1;
-    }
 
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons((unsigned short)port);
-    memcpy(&addr.sin_addr, hp->h_addr_list[0], hp->h_length);
+
+    if (connectAddr != NULL) {
+        addr.sin_addr.s_addr = inet_addr(connectAddr);
+        if (addr.sin_addr.s_addr == INADDR_NONE) {
+            LOGE("inet_addr(%s) failed", connectAddr);
+            return -1;
+        }
+    } else {
+        struct hostent *hp = gethostbyname(host);
+        if (hp == NULL) {
+            LOGE("gethostbyname(%s) failed", host);
+            return -1;
+        }
+        memcpy(&addr.sin_addr, hp->h_addr_list[0], hp->h_length);
+    }
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
@@ -92,7 +100,8 @@ static int tcp_connect(const char *host, int port) {
     setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
 
     if (connect(sockfd, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
-        LOGE("connect(%s:%d) failed: %s", host, port, strerror(errno));
+        LOGE("connect(%s:%d) failed: %s",
+             connectAddr ? connectAddr : host, port, strerror(errno));
         close(sockfd);
         return -1;
     }
@@ -105,7 +114,7 @@ Java_com_walkman_x10mini_WolfSSLNative_nativeHttpsRequest(
         JNIEnv *env, jclass cls,
         jstring jHost, jint port, jstring jPath,
         jstring jMethod, jbyteArray jBody,
-        jobjectArray jHeaders) {
+        jobjectArray jHeaders, jstring jConnectAddr) {
 
     if (g_ctx == NULL) {
         LOGE("wolfSSL not initialized");
@@ -115,9 +124,11 @@ Java_com_walkman_x10mini_WolfSSLNative_nativeHttpsRequest(
     const char *host = (*env)->GetStringUTFChars(env, jHost, NULL);
     const char *path = (*env)->GetStringUTFChars(env, jPath, NULL);
     const char *method = (*env)->GetStringUTFChars(env, jMethod, NULL);
+    const char *connectAddr = jConnectAddr != NULL
+            ? (*env)->GetStringUTFChars(env, jConnectAddr, NULL) : NULL;
     if (host == NULL || path == NULL || method == NULL) goto fail_strings;
 
-    int sockfd = tcp_connect(host, (int)port);
+    int sockfd = tcp_connect(host, connectAddr, (int)port);
     if (sockfd < 0) goto fail_strings;
 
     WOLFSSL *ssl = wolfSSL_new(g_ctx);
@@ -214,6 +225,8 @@ Java_com_walkman_x10mini_WolfSSLNative_nativeHttpsRequest(
     (*env)->ReleaseStringUTFChars(env, jHost, host);
     (*env)->ReleaseStringUTFChars(env, jPath, path);
     (*env)->ReleaseStringUTFChars(env, jMethod, method);
+    if (connectAddr != NULL)
+        (*env)->ReleaseStringUTFChars(env, jConnectAddr, connectAddr);
 
     if (total <= 0) {
         free(buf);
@@ -231,5 +244,6 @@ fail_strings:
     if (host != NULL) (*env)->ReleaseStringUTFChars(env, jHost, host);
     if (path != NULL) (*env)->ReleaseStringUTFChars(env, jPath, path);
     if (method != NULL) (*env)->ReleaseStringUTFChars(env, jMethod, method);
+    if (connectAddr != NULL) (*env)->ReleaseStringUTFChars(env, jConnectAddr, connectAddr);
     return NULL;
 }

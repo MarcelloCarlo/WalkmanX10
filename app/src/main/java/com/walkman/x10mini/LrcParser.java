@@ -101,6 +101,20 @@ public class LrcParser {
                 || tag.startsWith("ve:") || tag.startsWith("offset:");
     }
 
+    public static String stripTags(String lrcContent) {
+        if (lrcContent == null) return null;
+        ArrayList<LrcLine> lines = parse(lrcContent);
+        if (lines.size() > 0) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < lines.size(); i++) {
+                if (i > 0) sb.append('\n');
+                sb.append(lines.get(i).text);
+            }
+            return sb.toString();
+        }
+        return lrcContent;
+    }
+
     public static int findLineIndex(ArrayList<LrcLine> lines, long positionMs) {
         if (lines == null || lines.size() == 0) return -1;
 

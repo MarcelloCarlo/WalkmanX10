@@ -30,14 +30,16 @@ public class WolfSSLNative {
 
     public static byte[] httpsRequest(String host, int port, String path,
                                        String method, byte[] body,
-                                       String[] headers) {
+                                       String[] headers, String connectAddr) {
         if (!sInitialized) return null;
-        return nativeHttpsRequest(host, port, path, method, body, headers);
+        return nativeHttpsRequest(host, port, path, method, body, headers,
+                                  connectAddr);
     }
 
     private static native int nativeInit(String caCertPath);
     private static native void nativeCleanup();
     private static native byte[] nativeHttpsRequest(
             String host, int port, String path,
-            String method, byte[] body, String[] headers);
+            String method, byte[] body, String[] headers,
+            String connectAddr);
 }

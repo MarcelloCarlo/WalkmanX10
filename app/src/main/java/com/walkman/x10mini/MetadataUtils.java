@@ -43,11 +43,14 @@ public class MetadataUtils {
                 TlsHelper.Response resp = TlsHelper.httpsGet(urlStr);
                 if (resp != null && resp.statusCode == 200) {
                     parseResult(resp.body, result);
+                    return result;
                 }
-            } else {
+            }
+            {
                 String urlStr = "http://musicbrainz.org/ws/2/recording/?query="
                         + encoded + "&limit=1&fmt=json";
                 HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
+                conn.setInstanceFollowRedirects(false);
                 conn.setRequestProperty("User-Agent",
                         "WalkmanX10Mini/5.1.0 (walkman-backport)");
                 conn.setConnectTimeout(10000);
@@ -365,11 +368,59 @@ public class MetadataUtils {
         }
     }
 
+    public static LyricsResult searchLyricsLrclib(String title, String artist) {
+        if (!TlsHelper.isAvailable()) return null;
+        try {
+            String query = artist + " " + title;
+            String url = "https://lrclib.net/api/search?q="
+                    + TlsHelper.urlEncode(query);
+
+            TlsHelper.Response resp = TlsHelper.httpsGet(url);
+            if (resp == null || resp.statusCode != 200) return null;
+            String body = resp.body;
+            if (body == null || body.length() < 2) return null;
+
+            LyricsResult result = new LyricsResult();
+            int pos = 0;
+            while (pos < body.length()) {
+                int idx = body.indexOf("\"syncedLyrics\"", pos);
+                if (idx < 0) break;
+                String synced = extractValueAfterKey(body, idx);
+                if (synced != null && synced.length() > 0) {
+                    result.syncedLyrics = synced;
+                    int plainIdx = body.lastIndexOf("\"plainLyrics\"", idx);
+                    if (plainIdx >= 0) {
+                        result.plainLyrics = extractValueAfterKey(body, plainIdx);
+                    }
+                    return result;
+                }
+                pos = idx + 1;
+            }
+
+            int plainIdx = body.indexOf("\"plainLyrics\"");
+            if (plainIdx >= 0) {
+                String plain = extractValueAfterKey(body, plainIdx);
+                if (plain != null && plain.length() > 0) {
+                    result.plainLyrics = plain;
+                    return result;
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public static String fetchLyrics(String title, String artist) {
         if (TlsHelper.isAvailable()) {
             LyricsResult lr = fetchLyricsLrclib(title, artist, null, 0);
             if (lr != null) {
-                return lr.syncedLyrics != null ? lr.syncedLyrics : lr.plainLyrics;
+                if (lr.plainLyrics != null && lr.plainLyrics.length() > 0) {
+                    return lr.plainLyrics;
+                }
+                if (lr.syncedLyrics != null && lr.syncedLyrics.length() > 0) {
+                    return LrcParser.stripTags(lr.syncedLyrics);
+                }
             }
         }
 
@@ -421,11 +472,7 @@ public class MetadataUtils {
                     String location = conn.getHeaderField("Location");
                     conn.disconnect();
                     if (location == null) return null;
-                    if (!TlsHelper.isAvailable()) {
-                        url = location.replace("https://", "http://");
-                    } else {
-                        url = location;
-                    }
+                    url = location.replace("https://", "http://");
                 } else {
                     return conn;
                 }
@@ -445,18 +492,32 @@ public class MetadataUtils {
     public static String extractValueAfterKey(String json, int keyIdx) {
         int colonIdx = json.indexOf(':', keyIdx);
         if (colonIdx < 0) return null;
-        int quoteStart = json.indexOf('"', colonIdx);
-        if (quoteStart < 0) return null;
-        quoteStart++;
-        int quoteEnd = quoteStart;
-        while (quoteEnd < json.length()) {
-            char c = json.charAt(quoteEnd);
-            if (c == '"' && json.charAt(quoteEnd - 1) != '\\') break;
-            quoteEnd++;
+        int i = colonIdx + 1;
+        while (i < json.length()) {
+            char ws = json.charAt(i);
+            if (ws != ' ' && ws != '\t' && ws != '\r' && ws != '\n') break;
+            i++;
         }
-        if (quoteEnd >= json.length()) return null;
-        return json.substring(quoteStart, quoteEnd)
-                .replace("\\\"", "\"")
-                .replace("\\\\", "\\");
+        if (i >= json.length()) return null;
+        if (json.charAt(i) == 'n') return null;
+        if (json.charAt(i) != '"') return null;
+        i++;
+        StringBuilder sb = new StringBuilder();
+        while (i < json.length()) {
+            char c = json.charAt(i);
+            if (c == '"') break;
+            if (c == '\\' && i + 1 < json.length()) {
+                char next = json.charAt(i + 1);
+                if (next == 'n') { sb.append('\n'); i += 2; continue; }
+                if (next == 'r') { sb.append('\r'); i += 2; continue; }
+                if (next == 't') { sb.append('\t'); i += 2; continue; }
+                if (next == '"') { sb.append('"'); i += 2; continue; }
+                if (next == '\\') { sb.append('\\'); i += 2; continue; }
+                if (next == '/') { sb.append('/'); i += 2; continue; }
+            }
+            sb.append(c);
+            i++;
+        }
+        return sb.toString();
     }
 }

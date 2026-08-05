@@ -91,7 +91,11 @@ public class NowPlayingActivity extends Activity implements View.OnClickListener
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context ctx, Intent intent) {
-            updateUI();
+            if (MusicService.PLAYSTATE_CHANGED.equals(intent.getAction())) {
+                updatePlayButton();
+            } else {
+                updateUI();
+            }
         }
     };
 
@@ -617,6 +621,10 @@ public class NowPlayingActivity extends Activity implements View.OnClickListener
                 MetadataUtils.LyricsResult lr = MetadataUtils.fetchLyricsLrclib(
                         title, artist, album, durationSec);
 
+                if (lr == null) {
+                    lr = MetadataUtils.searchLyricsLrclib(title, artist);
+                }
+
                 if (lr != null && lr.syncedLyrics != null && lr.syncedLyrics.length() > 0) {
                     final ArrayList<LrcParser.LrcLine> parsed = LrcParser.parse(lr.syncedLyrics);
                     if (parsed.size() > 0) {
@@ -638,20 +646,23 @@ public class NowPlayingActivity extends Activity implements View.OnClickListener
                 } else {
                     lyrics = MetadataUtils.fetchLyrics(title, artist);
                 }
+                final ArrayList<LrcParser.LrcLine> fallbackParsed =
+                        lyrics != null ? LrcParser.parse(lyrics) : null;
                 mHandler.post(new Runnable() {
                     public void run() {
                         mLyricsLoaded = true;
-                        mLrcLines = null;
-                        if (lyrics != null) {
-                            mCurrentLyrics = lyrics;
-                            if (mLyricsVisible) {
-                                showPlainLyrics(lyrics);
-                            }
-                        } else {
+                        if (fallbackParsed != null && fallbackParsed.size() > 0) {
+                            mLrcLines = fallbackParsed;
                             mCurrentLyrics = null;
-                            if (mLyricsVisible) {
-                                showPlainLyrics("No lyrics found");
-                            }
+                            if (mLyricsVisible) showSyncedLyrics();
+                        } else if (lyrics != null) {
+                            mLrcLines = null;
+                            mCurrentLyrics = lyrics;
+                            if (mLyricsVisible) showPlainLyrics(lyrics);
+                        } else {
+                            mLrcLines = null;
+                            mCurrentLyrics = null;
+                            if (mLyricsVisible) showPlainLyrics("No lyrics found");
                         }
                     }
                 });

@@ -3,6 +3,7 @@ package com.walkman.x10mini;
 import android.content.Context;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.URLEncoder;
 
 public class TlsHelper {
@@ -57,8 +58,14 @@ public class TlsHelper {
         int port = Integer.parseInt(parts[1]);
         String path = parts[2];
 
+        String connectAddr = null;
+        try {
+            connectAddr = InetAddress.getByName(host).getHostAddress();
+        } catch (Exception e) {
+        }
+
         byte[] raw = WolfSSLNative.httpsRequest(host, port, path, method,
-                                                 body, headers);
+                                                 body, headers, connectAddr);
         if (raw == null) return null;
 
         return parseHttpResponse(raw);

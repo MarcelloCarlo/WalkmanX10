@@ -5,6 +5,7 @@ WOLFSSL_PATH := $(LOCAL_PATH)/wolfssl
 include $(CLEAR_VARS)
 LOCAL_MODULE := wolfssl-static
 LOCAL_MODULE_FILENAME := libwolfssl
+LOCAL_ARM_MODE := arm
 
 LOCAL_C_INCLUDES := \
     $(WOLFSSL_PATH) \
@@ -76,6 +77,7 @@ include $(BUILD_STATIC_LIBRARY)
 ########## libwolfssljni (shared) ##########
 include $(CLEAR_VARS)
 LOCAL_MODULE := wolfssljni
+LOCAL_ARM_MODE := arm
 
 LOCAL_C_INCLUDES := \
     $(WOLFSSL_PATH) \
